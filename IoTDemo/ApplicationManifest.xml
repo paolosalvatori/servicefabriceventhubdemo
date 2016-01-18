@@ -38,14 +38,23 @@
                   <Parameter Name="ServiceBusConnectionString" Value="[EventProcessorHostService_ServiceBusConnectionString]" />
                   <Parameter Name="EventHubName" Value="[EventProcessorHostService_EventHubName]" />
                   <Parameter Name="ConsumerGroupName" Value="[EventProcessorHostService_ConsumerGroupName]" />
+                  <Parameter Name="DeviceActorServiceUri" Value="[EventProcessorHostService_DeviceActorServiceUri]" />
                </Section>
             </Settings>
          </ConfigOverride>
       </ConfigOverrides>
    </ServiceManifestImport>
    <ServiceManifestImport>
-      <ServiceManifestRef ServiceManifestName="DeviceManagementWebServicePkg" ServiceManifestVersion="1.0.0" />
-      <ConfigOverrides />
+     <ServiceManifestRef ServiceManifestName="DeviceManagementWebServicePkg" ServiceManifestVersion="1.0.0" />
+     <ConfigOverrides>
+       <ConfigOverride Name="Config">
+         <Settings>
+           <Section Name="DeviceManagementWebServiceConfig">
+             <Parameter Name="DeviceActorServiceUri" Value="[DeviceManagementWebService_DeviceActorServiceUri]" />
+           </Section>
+         </Settings>
+       </ConfigOverride>
+     </ConfigOverrides>
    </ServiceManifestImport>
    <DefaultServices>
       <Service Name="DeviceActorService" GeneratedIdRef="de1d8306-f193-45ac-aa15-3efde9ffcb78">
