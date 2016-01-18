@@ -24,6 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Owin.Hosting;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using System.Linq;
 
 #endregion
 
@@ -36,7 +37,7 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
         // Parameters
         //************************************
         private const string ConfigurationPackage = "Config";
-        private const string ConfigurationSection = "DeviceActorServiceConfig";
+        private const string ConfigurationSection = "DeviceManagementWebServiceConfig";
         private const string DeviceActorServiceUriParameter = "DeviceActorServiceUri";
 
         //***************************
@@ -96,14 +97,25 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
                 var config = activationContext.GetConfigurationPackageObject(ConfigurationPackage);
                 var section = config.Settings.Sections[ConfigurationSection];
 
-                // Read the DeviceActorServiceUri setting from the Settings.xml file
-                var parameter = section.Parameters[DeviceActorServiceUriParameter];
-                DeviceActorServiceUri = !string.IsNullOrWhiteSpace(parameter?.Value) ?
-                                        parameter.Value :
-                                        // By default, the current service assumes that if no URI is explicitly defined for the actor service
-                                        // in the Setting.xml file, the latter is hosted in the same Service Fabric application.
-                                        $"fabric:/{serviceInitializationParameters.ServiceName.Segments[1]}DeviceActorService";
-                                
+                // Check if a parameter called DeviceActorServiceUri exists in the DeviceActorServiceConfig config section
+                if (section.Parameters.Any(p => string.Compare(p.Name,
+                                                               DeviceActorServiceUriParameter,
+                                                               StringComparison.InvariantCultureIgnoreCase) == 0))
+                {
+                    var parameter = section.Parameters[DeviceActorServiceUriParameter];
+                    DeviceActorServiceUri = !string.IsNullOrWhiteSpace(parameter?.Value) ?
+                                            parameter.Value :
+                                            // By default, the current service assumes that if no URI is explicitly defined for the actor service
+                                            // in the Setting.xml file, the latter is hosted in the same Service Fabric application.
+                                            $"fabric:/{serviceInitializationParameters.ServiceName.Segments[1]}DeviceActorService";
+                }
+                else
+                {
+                    // By default, the current service assumes that if no URI is explicitly defined for the actor service
+                    // in the Setting.xml file, the latter is hosted in the same Service Fabric application.
+                    DeviceActorServiceUri = $"fabric:/{serviceInitializationParameters.ServiceName.Segments[1]}DeviceActorService";
+                }
+
                 var serviceEndpoint = serviceInitializationParameters.CodePackageActivationContext.GetEndpoint("ServiceEndpoint");
                 var port = serviceEndpoint.Port;
 

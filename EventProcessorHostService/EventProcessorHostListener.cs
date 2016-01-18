@@ -23,6 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using System.Linq;
 
 #endregion
 
@@ -77,63 +78,125 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
                 var config = context.GetConfigurationPackageObject(ConfigurationPackage);
                 var section = config.Settings.Sections[ConfigurationSection];
 
-                // Read the StorageAccountConnectionString setting from the Settings.xml file
-                var parameter = section.Parameters[StorageAccountConnectionStringParameter];
-                if (!string.IsNullOrWhiteSpace(parameter?.Value))
+                // Check if a parameter called ServiceBusConnectionString exists in the EventProcessorHostConfig config section
+                if (section.Parameters.Any(p => string.Compare(p.Name,
+                                                               StorageAccountConnectionStringParameter,
+                                                               StringComparison.InvariantCultureIgnoreCase) == 0))
                 {
-                    storageAccountConnectionString = parameter.Value;
+                    // Read the StorageAccountConnectionString setting from the Settings.xml file
+                    var parameter = section.Parameters[StorageAccountConnectionStringParameter];
+                    if (!string.IsNullOrWhiteSpace(parameter?.Value))
+                    {
+                        storageAccountConnectionString = parameter.Value;
+                    }
+                    else
+                    {
+                        throw new ArgumentException(string.Format(ParameterCannotBeNullFormat,
+                                                              StorageAccountConnectionStringParameter),
+                                                              StorageAccountConnectionStringParameter);
+                    }
                 }
                 else
                 {
-                    throw new ArgumentException(
-                        string.Format(ParameterCannotBeNullFormat, StorageAccountConnectionStringParameter),
-                                      StorageAccountConnectionStringParameter);
+                    throw new ArgumentException(string.Format(ParameterCannotBeNullFormat, 
+                                                              StorageAccountConnectionStringParameter),
+                                                              StorageAccountConnectionStringParameter);
                 }
 
-                // Read the ServiceBusConnectionString setting from the Settings.xml file
-                parameter = section.Parameters[ServiceBusConnectionStringParameter];
-                if (!string.IsNullOrWhiteSpace(parameter?.Value))
+                // Check if a parameter called ServiceBusConnectionString exists in the EventProcessorHostConfig config section
+                if (section.Parameters.Any(p => string.Compare(p.Name,
+                                                               ServiceBusConnectionStringParameter,
+                                                               StringComparison.InvariantCultureIgnoreCase) == 0))
                 {
-                    serviceBusConnectionString = parameter.Value;
+                    // Read the ServiceBusConnectionString setting from the Settings.xml file
+                    var parameter = section.Parameters[ServiceBusConnectionStringParameter];
+                    if (!string.IsNullOrWhiteSpace(parameter?.Value))
+                    {
+                        serviceBusConnectionString = parameter.Value;
+                    }
+                    else
+                    {
+                        throw new ArgumentException(string.Format(ParameterCannotBeNullFormat, 
+                                                                  ServiceBusConnectionStringParameter),
+                                                                  ServiceBusConnectionStringParameter);
+                    }
                 }
                 else
                 {
-                    throw new ArgumentException(
-                        string.Format(ParameterCannotBeNullFormat, ServiceBusConnectionStringParameter),
-                                      ServiceBusConnectionStringParameter);
+                    throw new ArgumentException(string.Format(ParameterCannotBeNullFormat,
+                                                              ServiceBusConnectionStringParameter),
+                                                              ServiceBusConnectionStringParameter);
                 }
 
-                // Read the EventHubName setting from the Settings.xml file
-                parameter = section.Parameters[EventHubNameParameter];
-                if (!string.IsNullOrWhiteSpace(parameter?.Value))
+                // Check if a parameter called ConsumerGroupName exists in the EventProcessorHostConfig config section
+                if (section.Parameters.Any(p => string.Compare(p.Name,
+                                                               ConsumerGroupNameParameter,
+                                                               StringComparison.InvariantCultureIgnoreCase) == 0))
                 {
-                    eventHubName = parameter.Value;
+                    // Read the ConsumerGroupName setting from the Settings.xml file
+                    var parameter = section.Parameters[ConsumerGroupNameParameter];
+                    if (!string.IsNullOrWhiteSpace(parameter?.Value))
+                    {
+                        consumerGroupName = parameter.Value;
+                    }
+                    else
+                    {
+                        throw new ArgumentException(string.Format(ParameterCannotBeNullFormat, 
+                                                                  ConsumerGroupNameParameter),
+                                                                  ConsumerGroupNameParameter);
+                    }
                 }
                 else
                 {
-                    throw new ArgumentException(string.Format(ParameterCannotBeNullFormat, EventHubNameParameter),
-                                                EventHubNameParameter);
+                    throw new ArgumentException(string.Format(ParameterCannotBeNullFormat,
+                                                              ConsumerGroupNameParameter),
+                                                              ConsumerGroupNameParameter);
                 }
 
-                // Read the ConsumerGroupName setting from the Settings.xml file
-                parameter = section.Parameters[ConsumerGroupNameParameter];
-                if (!string.IsNullOrWhiteSpace(parameter?.Value))
+                // Check if a parameter called EventHubName exists in the EventProcessorHostConfig config section
+                if (section.Parameters.Any(p => string.Compare(p.Name,
+                                                               EventHubNameParameter,
+                                                               StringComparison.InvariantCultureIgnoreCase) == 0))
                 {
-                    consumerGroupName = parameter.Value;
+                    // Read the EventHubName setting from the Settings.xml file
+                    var parameter = section.Parameters[EventHubNameParameter];
+                    if (!string.IsNullOrWhiteSpace(parameter?.Value))
+                    {
+                        eventHubName = parameter.Value;
+                    }
+                    else
+                    {
+                        throw new ArgumentException(string.Format(ParameterCannotBeNullFormat, 
+                                                                  EventHubNameParameter),
+                                                                  EventHubNameParameter);
+                    }
                 }
                 else
                 {
-                    throw new ArgumentException(string.Format(ParameterCannotBeNullFormat, ConsumerGroupNameParameter),
-                                                ConsumerGroupNameParameter);
+                    throw new ArgumentException(string.Format(ParameterCannotBeNullFormat,
+                                                              EventHubNameParameter),
+                                                              EventHubNameParameter);
                 }
 
-                // Read the DeviceActorServiceUri setting from the Settings.xml file
-                parameter = section.Parameters[DeviceActorServiceUriParameter];
-                deviceActorServiceUri = !string.IsNullOrWhiteSpace(parameter?.Value) ? 
-                                        parameter.Value :
-                                        // By default, the current service assumes that if no URI is explicitly defined for the actor service
-                                        // in the Setting.xml file, the latter is hosted in the same Service Fabric application.
-                                        $"fabric:/{serviceInitializationParameters.ServiceName.Segments[1]}DeviceActorService";
+                // Check if a parameter called DeviceActorServiceUri exists in the DeviceActorServiceConfig config section
+                if (section.Parameters.Any(p => string.Compare(p.Name,
+                                                               DeviceActorServiceUriParameter,
+                                                               StringComparison.InvariantCultureIgnoreCase) == 0))
+                {
+                    // Read the DeviceActorServiceUri setting from the Settings.xml file
+                    var parameter = section.Parameters[DeviceActorServiceUriParameter];
+                    deviceActorServiceUri = !string.IsNullOrWhiteSpace(parameter?.Value) ?
+                                            parameter.Value :
+                                            // By default, the current service assumes that if no URI is explicitly defined for the actor service
+                                            // in the Setting.xml file, the latter is hosted in the same Service Fabric application.
+                                            $"fabric:/{serviceInitializationParameters.ServiceName.Segments[1]}DeviceActorService";
+                }
+                else
+                {
+                    // By default, the current service assumes that if no URI is explicitly defined for the actor service
+                    // in the Setting.xml file, the latter is hosted in the same Service Fabric application.
+                    deviceActorServiceUri = $"fabric:/{serviceInitializationParameters.ServiceName.Segments[1]}DeviceActorService";
+                }
 
                 // Start EventProcessorHost
                 await StartEventProcessorAsync();
