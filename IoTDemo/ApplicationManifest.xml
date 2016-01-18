@@ -12,9 +12,9 @@
       <Parameter Name="EventProcessorHostService_ServiceBusConnectionString" DefaultValue="" />
       <Parameter Name="EventProcessorHostService_EventHubName" DefaultValue="" />
       <Parameter Name="EventProcessorHostService_ConsumerGroupName" DefaultValue="" />
-      <Parameter Name="EventProcessorHostService_DeviceActorServiceUri" DefaultValue=""/>
+      <Parameter Name="EventProcessorHostService_DeviceActorServiceUri" DefaultValue="" />
       <Parameter Name="DeviceManagementWebService_InstanceCount" DefaultValue="-1" />
-      <Parameter Name="DeviceManagementWebService_DeviceActorServiceUri" DefaultValue=""/>
+      <Parameter Name="DeviceManagementWebService_DeviceActorServiceUri" DefaultValue="" />
    </Parameters>
    <ServiceManifestImport>
       <ServiceManifestRef ServiceManifestName="DeviceActorServicePkg" ServiceManifestVersion="1.0.0" />
