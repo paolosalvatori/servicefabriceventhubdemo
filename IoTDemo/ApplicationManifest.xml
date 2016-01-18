@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="IoTDemoType" ApplicationTypeVersion="1.0.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+   <Parameters>
+      <Parameter Name="DeviceActorService_PartitionCount" DefaultValue="5" />
+      <Parameter Name="DeviceActorService_MinReplicaSetSize" DefaultValue="2" />
+      <Parameter Name="DeviceActorService_TargetReplicaSetSize" DefaultValue="3" />
+      <Parameter Name="DeviceActorService_ServiceBusConnectionString" DefaultValue="" />
+      <Parameter Name="DeviceActorService_EventHubName" DefaultValue="" />
+      <Parameter Name="DeviceActorService_QueueLength" DefaultValue="100" />
+      <Parameter Name="EventProcessorHostService_InstanceCount" DefaultValue="-1" />
+      <Parameter Name="EventProcessorHostService_StorageAccountConnectionString" DefaultValue="" />
+      <Parameter Name="EventProcessorHostService_ServiceBusConnectionString" DefaultValue="" />
+      <Parameter Name="EventProcessorHostService_EventHubName" DefaultValue="" />
+      <Parameter Name="EventProcessorHostService_ConsumerGroupName" DefaultValue="" />
+      <Parameter Name="DeviceManagementWebService_InstanceCount" DefaultValue="-1" />
+   </Parameters>
+   <ServiceManifestImport>
+      <ServiceManifestRef ServiceManifestName="DeviceActorServicePkg" ServiceManifestVersion="1.0.0" />
+      <ConfigOverrides>
+         <ConfigOverride Name="Config">
+            <Settings>
+               <Section Name="DeviceActorServiceConfig">
+                  <Parameter Name="ServiceBusConnectionString" Value="[DeviceActorService_ServiceBusConnectionString]" />
+                  <Parameter Name="EventHubName" Value="[DeviceActorService_EventHubName]" />
+                  <Parameter Name="QueueLength" Value="[DeviceActorService_QueueLength]" />
+               </Section>
+            </Settings>
+         </ConfigOverride>
+      </ConfigOverrides>
+   </ServiceManifestImport>
+   <ServiceManifestImport>
+      <ServiceManifestRef ServiceManifestName="EventProcessorHostServicePkg" ServiceManifestVersion="1.0.0" />
+      <ConfigOverrides>
+         <ConfigOverride Name="Config">
+            <Settings>
+               <Section Name="EventProcessorHostConfig">
+                  <Parameter Name="StorageAccountConnectionString" Value="[EventProcessorHostService_StorageAccountConnectionString]" />
+                  <Parameter Name="ServiceBusConnectionString" Value="[EventProcessorHostService_ServiceBusConnectionString]" />
+                  <Parameter Name="EventHubName" Value="[EventProcessorHostService_EventHubName]" />
+                  <Parameter Name="ConsumerGroupName" Value="[EventProcessorHostService_ConsumerGroupName]" />
+               </Section>
+            </Settings>
+         </ConfigOverride>
+      </ConfigOverrides>
+   </ServiceManifestImport>
+   <ServiceManifestImport>
+      <ServiceManifestRef ServiceManifestName="DeviceManagementWebServicePkg" ServiceManifestVersion="1.0.0" />
+      <ConfigOverrides />
+   </ServiceManifestImport>
+   <DefaultServices>
+      <Service Name="DeviceActorService" GeneratedIdRef="de1d8306-f193-45ac-aa15-3efde9ffcb78">
+         <StatefulService ServiceTypeName="DeviceActorServiceType" TargetReplicaSetSize="[DeviceActorService_TargetReplicaSetSize]" MinReplicaSetSize="[DeviceActorService_MinReplicaSetSize]">
+            <UniformInt64Partition PartitionCount="[DeviceActorService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+         </StatefulService>
+      </Service>
+      <Service Name="EventProcessorHostService">
+         <StatelessService ServiceTypeName="EventProcessorHostServiceType" InstanceCount="[EventProcessorHostService_InstanceCount]">
+            <SingletonPartition />
+         </StatelessService>
+      </Service>
+      <Service Name="DeviceManagementWebService">
+         <StatelessService ServiceTypeName="DeviceManagementWebServiceType" InstanceCount="[DeviceManagementWebService_InstanceCount]">
+            <SingletonPartition />
+         </StatelessService>
+      </Service>
+   </DefaultServices>
+</ApplicationManifest>
