@@ -151,15 +151,15 @@ namespace Microsoft.AzureCat.Samples.DeviceSimulator
 
         private void DrawBorder(Graphics graphics)
         {
-            using (Pen pen = new Pen(this.headerColor2))
+            using (Pen pen = new Pen(headerColor2))
             {
-                graphics.DrawRectangle(pen, 0, 0, this.Width - 1, this.Height - 1);
+                graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
             }
         }
 
         private void DrawHeader(Graphics graphics)
         {
-            Rectangle headerRect = new Rectangle(1, 1, this.Width - 2, this.headerHeight);
+            Rectangle headerRect = new Rectangle(1, 1, Width - 2, headerHeight);
             using (Brush brush = new LinearGradientBrush(headerRect, headerColor1, headerColor2, LinearGradientMode.Vertical))
             {
                 graphics.FillRectangle(brush, headerRect);
@@ -168,28 +168,28 @@ namespace Microsoft.AzureCat.Samples.DeviceSimulator
 
         private void DrawText(Graphics graphics)
         {
-            if (!string.IsNullOrEmpty(this.headerText))
+            if (!string.IsNullOrEmpty(headerText))
             {
-                SizeF size = graphics.MeasureString(this.headerText, this.headerFont);
+                SizeF size = graphics.MeasureString(headerText, headerFont);
                 using (Brush brush = new SolidBrush(ForeColor))
                 {
                     float x;
-                    if (this.icon != null)
+                    if (icon != null)
                     {
-                        x = this.icon.Width + 6;
+                        x = icon.Width + 6;
                     }
                     else
                     {
                         x = 4;
                     }
-                    graphics.DrawString(this.headerText, this.headerFont, brush, x, (headerHeight - size.Height) / 2);
+                    graphics.DrawString(headerText, headerFont, brush, x, (headerHeight - size.Height) / 2);
                 }
             }
         }
 
         private void DrawIcon(Graphics graphics)
         {
-            if (this.icon != null)
+            if (icon != null)
             {
                 Point point = new Point(4, (headerHeight - icon.Height) / 2);
                 Bitmap bitmap = new Bitmap(icon);

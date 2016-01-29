@@ -19,13 +19,19 @@
 using System;
 using System.Fabric;
 using System.Threading;
-using Microsoft.ServiceFabric.Actors; 
+using Microsoft.ServiceFabric.Actors;
+using Microsoft.ApplicationInsights;
 #endregion
 
 namespace Microsoft.AzureCat.Samples.DeviceActorService
 {
     internal static class Program
     {
+        /// <summary>
+        /// Application Insights Telemetry Client static field
+        /// </summary>
+        internal static TelemetryClient TelemetryClient = new TelemetryClient();
+
         /// <summary>
         /// This is the entry point of the service host process.
         /// </summary>
@@ -34,7 +40,7 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
             try
             {
                 // Creating a FabricRuntime connects this host process to the Service Fabric runtime on this node.
-                using (FabricRuntime fabricRuntime = FabricRuntime.Create())
+                using (var fabricRuntime = FabricRuntime.Create())
                 {
                     // This line registers your actor class with the Fabric Runtime.
                     // The contents of your ServiceManifest.xml and ApplicationManifest.xml files
@@ -42,13 +48,24 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                     // For more information, see http://aka.ms/servicefabricactorsplatform
                     fabricRuntime.RegisterActor<DeviceActor>();
 
-                    Thread.Sleep(Timeout.Infinite);  // Prevents this host process from terminating to keep the service host process running.
+                    // Initialize telemetry client
+                    TelemetryClient.Context.User.Id = Environment.UserName;
+                    TelemetryClient.Context.Session.Id = Guid.NewGuid().ToString();
+                    TelemetryClient.Context.Device.OperatingSystem = Environment.OSVersion.ToString();
+
+                    Thread.Sleep(Timeout.Infinite);
+                        // Prevents this host process from terminating to keep the service host process running.
                 }
             }
             catch (Exception e)
             {
-                ActorEventSource.Current.ActorHostInitializationFailed(e.ToString());
+                TelemetryClient.TrackException(e);
+                ActorEventSource.Current.ActorHostInitializationFailed(e);
                 throw;
+            }
+            finally
+            {
+                TelemetryClient.Flush();
             }
         }
     }

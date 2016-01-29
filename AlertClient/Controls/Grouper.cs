@@ -83,23 +83,23 @@ namespace Microsoft.AzureCat.Samples.AlertClient
 
         /// <summary>This feature will paint the background color of the control.</summary>
         [Category("Appearance"), Description("This feature will paint the background color of the control.")]
-        public override Color BackColor { get { return V_BackColor; } set { V_BackColor = value; this.Refresh(); } }
+        public override Color BackColor { get { return V_BackColor; } set { V_BackColor = value; Refresh(); } }
 
         /// <summary>This feature will paint the group title background to the specified color if PaintGroupBox is set to true.</summary>
         [Category("Appearance"), Description("This feature will paint the group title background to the specified color if PaintGroupBox is set to true.")]
-        public Color CustomGroupBoxColor { get { return V_CustomGroupBoxColor; } set { V_CustomGroupBoxColor = value; this.Refresh(); } }
+        public Color CustomGroupBoxColor { get { return V_CustomGroupBoxColor; } set { V_CustomGroupBoxColor = value; Refresh(); } }
 
         /// <summary>This feature will paint the group title background to the CustomGroupBoxColor.</summary>
         [Category("Appearance"), Description("This feature will paint the group title background to the CustomGroupBoxColor.")]
-        public bool PaintGroupBox { get { return V_PaintGroupBox; } set { V_PaintGroupBox = value; this.Refresh(); } }
+        public bool PaintGroupBox { get { return V_PaintGroupBox; } set { V_PaintGroupBox = value; Refresh(); } }
 
         /// <summary>This feature can add a 16 x 16 image to the group title bar.</summary>
         [Category("Appearance"), Description("This feature can add a 16 x 16 image to the group title bar.")]
-        public Image GroupImage { get { return V_GroupImage; } set { V_GroupImage = value; this.Refresh(); } }
+        public Image GroupImage { get { return V_GroupImage; } set { V_GroupImage = value; Refresh(); } }
 
         /// <summary>This feature will change the control's shadow color.</summary>
         [Category("Appearance"), Description("This feature will change the control's shadow color.")]
-        public Color ShadowColor { get { return V_ShadowColor; } set { V_ShadowColor = value; this.Refresh(); } }
+        public Color ShadowColor { get { return V_ShadowColor; } set { V_ShadowColor = value; Refresh(); } }
 
         /// <summary>This feature will change the size of the shadow border.</summary>
         [Category("Appearance"), Description("This feature will change the size of the shadow border.")]
@@ -118,22 +118,22 @@ namespace Microsoft.AzureCat.Samples.AlertClient
                     else { V_ShadowThickness = value; }
                 }
 
-                this.Refresh();
+                Refresh();
             }
         }
 
 
         /// <summary>This feature will change the group control color. This color can also be used in combination with BackgroundGradientColor for a gradient paint.</summary>
         [Category("Appearance"), Description("This feature will change the group control color. This color can also be used in combination with BackgroundGradientColor for a gradient paint.")]
-        public Color BackgroundColor { get { return V_BackgroundColor; } set { V_BackgroundColor = value; this.Refresh(); } }
+        public Color BackgroundColor { get { return V_BackgroundColor; } set { V_BackgroundColor = value; Refresh(); } }
 
         /// <summary>This feature can be used in combination with BackgroundColor to create a gradient background.</summary>
         [Category("Appearance"), Description("This feature can be used in combination with BackgroundColor to create a gradient background.")]
-        public Color BackgroundGradientColor { get { return V_BackgroundGradientColor; } set { V_BackgroundGradientColor = value; this.Refresh(); } }
+        public Color BackgroundGradientColor { get { return V_BackgroundGradientColor; } set { V_BackgroundGradientColor = value; Refresh(); } }
 
         /// <summary>This feature turns on background gradient painting.</summary>
         [Category("Appearance"), Description("This feature turns on background gradient painting.")]
-        public GroupBoxGradientMode BackgroundGradientMode { get { return V_BackgroundGradientMode; } set { V_BackgroundGradientMode = value; this.Refresh(); } }
+        public GroupBoxGradientMode BackgroundGradientMode { get { return V_BackgroundGradientMode; } set { V_BackgroundGradientMode = value; Refresh(); } }
 
         /// <summary>This feature will round the corners of the control.</summary>
         [Category("Appearance"), Description("This feature will round the corners of the control.")]
@@ -152,17 +152,17 @@ namespace Microsoft.AzureCat.Samples.AlertClient
                     else { V_RoundCorners = value; }
                 }
 
-                this.Refresh();
+                Refresh();
             }
         }
 
         /// <summary>This feature will add a group title to the control.</summary>
         [Category("Appearance"), Description("This feature will add a group title to the control.")]
-        public string GroupTitle { get { return V_GroupTitle; } set { V_GroupTitle = value; this.Refresh(); } }
+        public string GroupTitle { get { return V_GroupTitle; } set { V_GroupTitle = value; Refresh(); } }
 
         /// <summary>This feature will allow you to change the color of the control's border.</summary>
         [Category("Appearance"), Description("This feature will allow you to change the color of the control's border.")]
-        public Color BorderColor { get { return V_BorderColor; } set { V_BorderColor = value; this.Refresh(); } }
+        public Color BorderColor { get { return V_BorderColor; } set { V_BorderColor = value; Refresh(); } }
 
         /// <summary>This feature will allow you to set the control's border size.</summary>
         [Category("Appearance"), Description("This feature will allow you to set the control's border size.")]
@@ -180,13 +180,13 @@ namespace Microsoft.AzureCat.Samples.AlertClient
                     if (value < 1) { V_BorderThickness = 1; }
                     else { V_BorderThickness = value; }
                 }
-                this.Refresh();
+                Refresh();
             }
         }
 
         /// <summary>This feature will allow you to turn on control shadowing.</summary>
         [Category("Appearance"), Description("This feature will allow you to turn on control shadowing.")]
-        public bool ShadowControl { get { return V_ShadowControl; } set { V_ShadowControl = value; this.Refresh(); } }
+        public bool ShadowControl { get { return V_ShadowControl; } set { V_ShadowControl = value; Refresh(); } }
 
         #endregion
 
@@ -220,10 +220,10 @@ namespace Microsoft.AzureCat.Samples.AlertClient
         private void InitializeStyles()
         {
             //Set the control styles----------------------------------
-            this.SetStyle(ControlStyles.DoubleBuffer, true);
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            this.SetStyle(ControlStyles.UserPaint, true);
-            this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            SetStyle(ControlStyles.DoubleBuffer, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(ControlStyles.UserPaint, true);
+            SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             //--------------------------------------------------------
         }
 
@@ -232,10 +232,10 @@ namespace Microsoft.AzureCat.Samples.AlertClient
         private void InitializeGroupBox()
         {
             components = new Container();
-            this.Resize += new EventHandler(GroupBox_Resize);
-            this.DockPadding.All = 20;
-            this.Name = "GroupBox";
-            this.Size = new Size(368, 288);
+            Resize += new EventHandler(GroupBox_Resize);
+            DockPadding.All = 20;
+            Name = "GroupBox";
+            Size = new Size(368, 288);
         }
 
 
@@ -272,21 +272,21 @@ namespace Microsoft.AzureCat.Samples.AlertClient
             //-------------------------------------------
 
             //Declare Variables------------------
-            SizeF StringSize = g.MeasureString(this.GroupTitle, this.Font);
+            SizeF StringSize = g.MeasureString(GroupTitle, Font);
             Size StringSize2 = StringSize.ToSize();
-            if (this.GroupImage != null) { StringSize2.Width += 18; }
-            int ArcWidth = this.RoundCorners;
-            int ArcHeight = this.RoundCorners;
+            if (GroupImage != null) { StringSize2.Width += 18; }
+            int ArcWidth = RoundCorners;
+            int ArcHeight = RoundCorners;
             int ArcX1 = 20;
             int ArcX2 = (StringSize2.Width + 34) - (ArcWidth + 1);
             int ArcY1 = 0;
             int ArcY2 = 24 - (ArcHeight + 1);
             GraphicsPath path = new GraphicsPath();
-            Brush BorderBrush = new SolidBrush(this.BorderColor);
-            Pen BorderPen = new Pen(BorderBrush, this.BorderThickness);
+            Brush BorderBrush = new SolidBrush(BorderColor);
+            Pen BorderPen = new Pen(BorderBrush, BorderThickness);
             LinearGradientBrush BackgroundGradientBrush = null;
-            Brush BackgroundBrush = (this.PaintGroupBox) ? new SolidBrush(this.CustomGroupBoxColor) : new SolidBrush(this.BackgroundColor);
-            SolidBrush TextColorBrush = new SolidBrush(this.ForeColor);
+            Brush BackgroundBrush = (PaintGroupBox) ? new SolidBrush(CustomGroupBoxColor) : new SolidBrush(BackgroundColor);
+            SolidBrush TextColorBrush = new SolidBrush(ForeColor);
             SolidBrush ShadowBrush = null;
             GraphicsPath ShadowPath = null;
             //-----------------------------------
@@ -294,12 +294,12 @@ namespace Microsoft.AzureCat.Samples.AlertClient
             //Check if shadow is needed----------
             if (ShadowControl)
             {
-                ShadowBrush = new SolidBrush(this.ShadowColor);
+                ShadowBrush = new SolidBrush(ShadowColor);
                 ShadowPath = new GraphicsPath();
-                ShadowPath.AddArc(ArcX1 + (this.ShadowThickness - 1), ArcY1 + (this.ShadowThickness - 1), ArcWidth, ArcHeight, 180, GroupBoxConstants.SweepAngle); // TopCount Left
-                ShadowPath.AddArc(ArcX2 + (this.ShadowThickness - 1), ArcY1 + (this.ShadowThickness - 1), ArcWidth, ArcHeight, 270, GroupBoxConstants.SweepAngle); //TopCount Right
-                ShadowPath.AddArc(ArcX2 + (this.ShadowThickness - 1), ArcY2 + (this.ShadowThickness - 1), ArcWidth, ArcHeight, 360, GroupBoxConstants.SweepAngle); //Bottom Right
-                ShadowPath.AddArc(ArcX1 + (this.ShadowThickness - 1), ArcY2 + (this.ShadowThickness - 1), ArcWidth, ArcHeight, 90, GroupBoxConstants.SweepAngle); //Bottom Left
+                ShadowPath.AddArc(ArcX1 + (ShadowThickness - 1), ArcY1 + (ShadowThickness - 1), ArcWidth, ArcHeight, 180, GroupBoxConstants.SweepAngle); // TopCount Left
+                ShadowPath.AddArc(ArcX2 + (ShadowThickness - 1), ArcY1 + (ShadowThickness - 1), ArcWidth, ArcHeight, 270, GroupBoxConstants.SweepAngle); //TopCount Right
+                ShadowPath.AddArc(ArcX2 + (ShadowThickness - 1), ArcY2 + (ShadowThickness - 1), ArcWidth, ArcHeight, 360, GroupBoxConstants.SweepAngle); //Bottom Right
+                ShadowPath.AddArc(ArcX1 + (ShadowThickness - 1), ArcY2 + (ShadowThickness - 1), ArcWidth, ArcHeight, 90, GroupBoxConstants.SweepAngle); //Bottom Left
                 ShadowPath.CloseAllFigures();
 
                 //Paint Rounded Rectangle------------
@@ -317,7 +317,7 @@ namespace Microsoft.AzureCat.Samples.AlertClient
             //-----------------------------------
 
             //Check if Gradient Mode is enabled--
-            if (this.PaintGroupBox)
+            if (PaintGroupBox)
             {
                 //Paint Rounded Rectangle------------
                 g.FillPath(BackgroundBrush, path);
@@ -325,7 +325,7 @@ namespace Microsoft.AzureCat.Samples.AlertClient
             }
             else
             {
-                if (this.BackgroundGradientMode == GroupBoxGradientMode.None)
+                if (BackgroundGradientMode == GroupBoxGradientMode.None)
                 {
                     //Paint Rounded Rectangle------------
                     g.FillPath(BackgroundBrush, path);
@@ -333,7 +333,7 @@ namespace Microsoft.AzureCat.Samples.AlertClient
                 }
                 else
                 {
-                    BackgroundGradientBrush = new LinearGradientBrush(new Rectangle(0, 0, this.Width, this.Height), this.BackgroundColor, this.BackgroundGradientColor, (LinearGradientMode)this.BackgroundGradientMode);
+                    BackgroundGradientBrush = new LinearGradientBrush(new Rectangle(0, 0, Width, Height), BackgroundColor, BackgroundGradientColor, (LinearGradientMode)BackgroundGradientMode);
 
                     //Paint Rounded Rectangle------------
                     g.FillPath(BackgroundGradientBrush, path);
@@ -347,14 +347,14 @@ namespace Microsoft.AzureCat.Samples.AlertClient
             //-----------------------------------
 
             //Paint Text-------------------------
-            int CustomStringWidth = (this.GroupImage != null) ? 44 : 28;
-            g.DrawString(this.GroupTitle, this.Font, TextColorBrush, CustomStringWidth, 5);
+            int CustomStringWidth = (GroupImage != null) ? 44 : 28;
+            g.DrawString(GroupTitle, Font, TextColorBrush, CustomStringWidth, 5);
             //-----------------------------------
 
             //Draw GroupImage if there is one----
-            if (this.GroupImage != null)
+            if (GroupImage != null)
             {
-                g.DrawImage(this.GroupImage, 28, 4, 16, 16);
+                g.DrawImage(GroupImage, 28, 4, 16, 16);
             }
             //-----------------------------------
 
@@ -381,30 +381,30 @@ namespace Microsoft.AzureCat.Samples.AlertClient
             //-------------------------------------------
 
             //Declare Variables------------------
-            int ArcWidth = this.RoundCorners * 2;
-            int ArcHeight = this.RoundCorners * 2;
+            int ArcWidth = RoundCorners * 2;
+            int ArcHeight = RoundCorners * 2;
             int ArcX1 = 0;
-            int ArcX2 = (this.ShadowControl) ? (this.Width - (ArcWidth + 1)) - this.ShadowThickness : this.Width - (ArcWidth + 1);
+            int ArcX2 = (ShadowControl) ? (Width - (ArcWidth + 1)) - ShadowThickness : Width - (ArcWidth + 1);
             int ArcY1 = 10;
-            int ArcY2 = (this.ShadowControl) ? (this.Height - (ArcHeight + 1)) - this.ShadowThickness : this.Height - (ArcHeight + 1);
+            int ArcY2 = (ShadowControl) ? (Height - (ArcHeight + 1)) - ShadowThickness : Height - (ArcHeight + 1);
             GraphicsPath path = new GraphicsPath();
-            Brush BorderBrush = new SolidBrush(this.BorderColor);
-            Pen BorderPen = new Pen(BorderBrush, this.BorderThickness);
+            Brush BorderBrush = new SolidBrush(BorderColor);
+            Pen BorderPen = new Pen(BorderBrush, BorderThickness);
             LinearGradientBrush BackgroundGradientBrush = null;
-            Brush BackgroundBrush = new SolidBrush(this.BackgroundColor);
+            Brush BackgroundBrush = new SolidBrush(BackgroundColor);
             SolidBrush ShadowBrush = null;
             GraphicsPath ShadowPath = null;
             //-----------------------------------
 
             //Check if shadow is needed----------
-            if (this.ShadowControl)
+            if (ShadowControl)
             {
-                ShadowBrush = new SolidBrush(this.ShadowColor);
+                ShadowBrush = new SolidBrush(ShadowColor);
                 ShadowPath = new GraphicsPath();
-                ShadowPath.AddArc(ArcX1 + this.ShadowThickness, ArcY1 + this.ShadowThickness, ArcWidth, ArcHeight, 180, GroupBoxConstants.SweepAngle); // TopCount Left
-                ShadowPath.AddArc(ArcX2 + this.ShadowThickness, ArcY1 + this.ShadowThickness, ArcWidth, ArcHeight, 270, GroupBoxConstants.SweepAngle); //TopCount Right
-                ShadowPath.AddArc(ArcX2 + this.ShadowThickness, ArcY2 + this.ShadowThickness, ArcWidth, ArcHeight, 360, GroupBoxConstants.SweepAngle); //Bottom Right
-                ShadowPath.AddArc(ArcX1 + this.ShadowThickness, ArcY2 + this.ShadowThickness, ArcWidth, ArcHeight, 90, GroupBoxConstants.SweepAngle); //Bottom Left
+                ShadowPath.AddArc(ArcX1 + ShadowThickness, ArcY1 + ShadowThickness, ArcWidth, ArcHeight, 180, GroupBoxConstants.SweepAngle); // TopCount Left
+                ShadowPath.AddArc(ArcX2 + ShadowThickness, ArcY1 + ShadowThickness, ArcWidth, ArcHeight, 270, GroupBoxConstants.SweepAngle); //TopCount Right
+                ShadowPath.AddArc(ArcX2 + ShadowThickness, ArcY2 + ShadowThickness, ArcWidth, ArcHeight, 360, GroupBoxConstants.SweepAngle); //Bottom Right
+                ShadowPath.AddArc(ArcX1 + ShadowThickness, ArcY2 + ShadowThickness, ArcWidth, ArcHeight, 90, GroupBoxConstants.SweepAngle); //Bottom Left
                 ShadowPath.CloseAllFigures();
 
                 //Paint Rounded Rectangle------------
@@ -422,7 +422,7 @@ namespace Microsoft.AzureCat.Samples.AlertClient
             //-----------------------------------
 
             //Check if Gradient Mode is enabled--
-            if (this.BackgroundGradientMode == GroupBoxGradientMode.None)
+            if (BackgroundGradientMode == GroupBoxGradientMode.None)
             {
                 //Paint Rounded Rectangle------------
                 g.FillPath(BackgroundBrush, path);
@@ -430,7 +430,7 @@ namespace Microsoft.AzureCat.Samples.AlertClient
             }
             else
             {
-                BackgroundGradientBrush = new LinearGradientBrush(new Rectangle(0, 0, this.Width, this.Height), this.BackgroundColor, this.BackgroundGradientColor, (LinearGradientMode)this.BackgroundGradientMode);
+                BackgroundGradientBrush = new LinearGradientBrush(new Rectangle(0, 0, Width, Height), BackgroundColor, BackgroundGradientColor, (LinearGradientMode)BackgroundGradientMode);
 
                 //Paint Rounded Rectangle------------
                 g.FillPath(BackgroundGradientBrush, path);
@@ -459,7 +459,7 @@ namespace Microsoft.AzureCat.Samples.AlertClient
         /// <param name="e">The event arguments.</param>
         private void GroupBox_Resize(object sender, EventArgs e)
         {
-            this.Refresh();
+            Refresh();
         }
 
 

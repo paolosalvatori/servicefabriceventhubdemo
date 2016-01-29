@@ -19,8 +19,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Fabric;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AzureCat.Samples.DeviceActorService.Interfaces;
 using Microsoft.AzureCat.Samples.PayloadEntities;
 using Microsoft.ServiceBus.Messaging;
@@ -119,7 +122,18 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
             }
             catch (Exception ex)
             {
-                ActorEventSource.Current.Message(ex.Message);
+                // Trace exception as ETW event
+                ActorEventSource.Current.Error(ex);
+
+                // Trace exception using Application Insights
+                Program.TelemetryClient.TrackException(ex, new Dictionary<string, string>
+                {
+                    { "ActorType", "DeviceActor"},
+                    { "ActorId", Id.ToString()},
+                    { "ServiceName", ActorService.ServiceInitializationParameters.ServiceName.ToString()},
+                    { "Partition", ActorService.ServicePartition.PartitionInfo.Id.ToString()},
+                    { "Node", FabricRuntime.GetNodeContext().NodeName}
+                });
             }
             return Task.FromResult(0);
         }
@@ -145,7 +159,43 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                 {
                     queue.Dequeue();
                 }
-                ActorEventSource.Current.Message($"[DeviceActor] Id=[{payload.DeviceId}] Value=[{payload.Value}] Timestamp=[{payload.Timestamp}]");
+
+                // Trace ETW event
+                ActorEventSource.Current.Message($"Id=[{payload.DeviceId}] Value=[{payload.Value}] Timestamp=[{payload.Timestamp}]");
+
+                // This ETW event is traced to a separate table with respect to the message
+                ActorEventSource.Current.Telemetry(State.Data, payload);
+
+                // Track Application Insights event
+                Program.TelemetryClient.TrackEvent(new EventTelemetry
+                {
+                    Name = "Telemetry",
+                    Properties =
+                            {
+                                {"DeviceId", State.Data.DeviceId.ToString(CultureInfo.InvariantCulture)},
+                                {"Name", State.Data.Name},
+                                {"City", State.Data.City},
+                                {"Country", State.Data.Country},
+                                {"Manufacturer", State.Data.Manufacturer},
+                                {"Model", State.Data.Model},
+                                {"Type", State.Data.Type},
+                                {"MinThreshold", State.Data.MinThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"MaxThreshold", State.Data.MaxThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"Value", payload.Value.ToString(CultureInfo.InvariantCulture)},
+                                {"Status", payload.Status},
+                                {"Timestamp", payload.Timestamp.ToString(CultureInfo.InvariantCulture)},
+                                {"ActorType", "DeviceActor"},
+                                {"ActorId", Id.ToString()},
+                                {"ServiceName", ActorService.ServiceInitializationParameters.ServiceName.ToString()},
+                                {"Partition", ActorService.ServicePartition.PartitionInfo.Id.ToString()},
+                                {"Node", FabricRuntime.GetNodeContext().NodeName}
+                            },
+                    Metrics =
+                            {
+                                {"TelemetryValue", payload.Value},
+                                {"TelemetryCount", 1}
+                            },
+                });
 
                 // Real spikes happen when both Spike1 and Spike2 are equal to 1. By the way, you can change the logic
                 if (payload.Value < State.Data.MinThreshold || payload.Value > State.Data.MaxThreshold)
@@ -179,19 +229,93 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
 
                         // Send the event to the event hub
                         await eventHubClient.SendAsync(eventData);
-                        ActorEventSource.Current.Message($"------> [DeviceActor] Id=[{payload.DeviceId}] Value=[{payload.Value}] Anomaly detected!");
+
+                        // Trace ETW event
+                        ActorEventSource.Current.Message($"[Alert] Id=[{payload.DeviceId}] Value=[{payload.Value}] Timestamp=[{payload.Timestamp}]");
+
+                        // This ETW event is traced to a separate table
+                        ActorEventSource.Current.Alert(State.Data, payload);
+
+                        // Track Application Insights event
+                        Program.TelemetryClient.TrackEvent(new EventTelemetry
+                        {
+                            Name = "Alert",
+                            Properties =
+                            {
+                                {"DeviceId", State.Data.DeviceId.ToString(CultureInfo.InvariantCulture)},
+                                {"Name", State.Data.Name},
+                                {"City", State.Data.City},
+                                {"Country", State.Data.Country},
+                                {"Manufacturer", State.Data.Manufacturer},
+                                {"Model", State.Data.Model},
+                                {"Type", State.Data.Type},
+                                {"MinThreshold", State.Data.MinThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"MaxThreshold", State.Data.MaxThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"Value", payload.Value.ToString(CultureInfo.InvariantCulture)},
+                                {"Status", payload.Status},
+                                {"Timestamp", payload.Timestamp.ToString(CultureInfo.InvariantCulture)},
+                                {"ActorType", "DeviceActor"},
+                                {"ActorId", Id.ToString()},
+                                {"ServiceName", ActorService.ServiceInitializationParameters.ServiceName.ToString()},
+                                {"Partition", ActorService.ServicePartition.PartitionInfo.Id.ToString()},
+                                {"Node", FabricRuntime.GetNodeContext().NodeName}
+                            },
+                            Metrics =
+                            {
+                                {"AlertValue", payload.Value},
+                                {"AlertCount", 1}
+                            },
+                        });
                     }
                 }
             }
             catch (Exception ex)
             {
-                ActorEventSource.Current.Message(ex.Message);
+                // Trace exception as ETW event
+                ActorEventSource.Current.Error(ex);
+
+                // Trace exception using Application Insights
+                Program.TelemetryClient.TrackException(ex, new Dictionary<string, string>
+                {
+                    { "ActorType", "DeviceActor"},
+                    { "ActorId", Id.ToString()},
+                    { "ServiceName", ActorService.ServiceInitializationParameters.ServiceName.ToString()},
+                    { "Partition", ActorService.ServicePartition.PartitionInfo.Id.ToString()},
+                    { "Node", FabricRuntime.GetNodeContext().NodeName}
+                });
             }
         }
 
         public Task SetData(Device data)
         {
             State.Data = data;
+
+            // Trace ETW event
+            ActorEventSource.Current.Metadata(data);
+
+            // Track Application Insights event
+            Program.TelemetryClient.TrackEvent(new EventTelemetry
+            {
+                Name = "Metadata",
+                Properties =
+                            {
+                                {"DeviceId", State.Data.DeviceId.ToString(CultureInfo.InvariantCulture)},
+                                {"Name", State.Data.Name},
+                                {"City", State.Data.City},
+                                {"Country", State.Data.Country},
+                                {"Manufacturer", State.Data.Manufacturer},
+                                {"Model", State.Data.Model},
+                                {"Type", State.Data.Type},
+                                {"MinThreshold", State.Data.MinThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"MaxThreshold", State.Data.MaxThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"ActorType", "DeviceActor"},
+                                {"ActorId", Id.ToString()},
+                                {"ServiceName", ActorService.ServiceInitializationParameters.ServiceName.ToString()},
+                                {"Partition", ActorService.ServicePartition.PartitionInfo.Id.ToString()},
+                                {"Node", FabricRuntime.GetNodeContext().NodeName}
+                            }
+            });
+
             return Task.FromResult(0);
         }
 
@@ -253,11 +377,12 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
 
         public void CreateEventHubClient()
         {
-            if (!string.IsNullOrWhiteSpace(serviceBusConnectionString) && !string.IsNullOrWhiteSpace(eventHubName))
+            if (string.IsNullOrWhiteSpace(serviceBusConnectionString) || string.IsNullOrWhiteSpace(eventHubName))
             {
-                eventHubClient = EventHubClient.CreateFromConnectionString(serviceBusConnectionString, eventHubName);
-                ActorEventSource.Current.Message($"[DeviceActor] Id=[{State.Data.DeviceId}] EventHubClient created");
+                return;
             }
+            eventHubClient = EventHubClient.CreateFromConnectionString(serviceBusConnectionString, eventHubName);
+            ActorEventSource.Current.Message($"Id=[{State.Data.DeviceId}] EventHubClient created");
         }
         #endregion
     }

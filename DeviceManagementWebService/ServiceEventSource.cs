@@ -65,7 +65,7 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
         [NonEvent]
         public void Message(string message, params object[] args)
         {
-            if (this.IsEnabled())
+            if (IsEnabled())
             {
                 string finalMessage = string.Format(message, args);
                 Message(finalMessage);
@@ -76,7 +76,7 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
         [Event(MessageEventId, Level = EventLevel.Informational, Message = "{0}")]
         public void Message(string message)
         {
-            if (this.IsEnabled())
+            if (IsEnabled())
             {
                 WriteEvent(MessageEventId, message);
             }
@@ -85,7 +85,7 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
         [NonEvent]
         public void ServiceMessage(StatelessService service, string message, params object[] args)
         {
-            if (this.IsEnabled())
+            if (IsEnabled())
             {
                 string finalMessage = string.Format(message, args);
                 ServiceMessage(
@@ -103,7 +103,7 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
         [NonEvent]
         public void ServiceMessage(StatefulService service, string message, params object[] args)
         {
-            if (this.IsEnabled())
+            if (IsEnabled())
             {
                 string finalMessage = string.Format(message, args);
                 ServiceMessage(

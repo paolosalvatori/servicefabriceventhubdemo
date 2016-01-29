@@ -2,14 +2,14 @@
 <Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/IoTDemo" xmlns="http://schemas.microsoft.com/2011/01/fabric">
    <Parameters>
       <Parameter Name="EventProcessorHostService_InstanceCount" Value="-1" />
-      <Parameter Name="EventProcessorHostService_StorageAccountConnectionString" Value="[Input-Event-Hub-Storage-Account-Connection-String]" />
-      <Parameter Name="EventProcessorHostService_ServiceBusConnectionString" Value="[Input-Event-Hub-Service-Bus-Connection-String]" />
-      <Parameter Name="EventProcessorHostService_ConsumerGroupName" Value="[Input-Event-Hub-Consumer-Group-Name]" />
-      <Parameter Name="EventProcessorHostService_EventHubName" Value="[Input-Event-Hub-Name]" />
+      <Parameter Name="EventProcessorHostService_StorageAccountConnectionString" Value="DefaultEndpointsProtocol=https;AccountName=ioteventhubdemo;AccountKey=DUWgNmjLcke4wLnePrXK5WpdkvA9Z/kFB5ECBT6Sz+Y+VdJN0hOp/FK1cpVx6d1Bu1vs8Kv89EKhwPbExeCCqA==" />
+      <Parameter Name="EventProcessorHostService_ServiceBusConnectionString" Value="Endpoint=sb://iotland.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ewniN1cBNBi9I2WCYKGr6k/bSg1q5C25l04gCqixXJo=" />
+      <Parameter Name="EventProcessorHostService_EventHubName" Value="DeviceDemoInputHub" />
+      <Parameter Name="EventProcessorHostService_ConsumerGroupName" Value="AzureServiceFabric" />
       <Parameter Name="DeviceManagementWebService_InstanceCount" Value="-1" />
       <Parameter Name="DeviceActorService_PartitionCount" Value="5" />
-      <Parameter Name="DeviceActorService_ServiceBusConnectionString" Value="[Output-Event-Hub-Service-Bus-Connection-String]" />
-      <Parameter Name="DeviceActorService_EventHubName" Value="[Output-Event-Hub-Name]" />
+      <Parameter Name="DeviceActorService_ServiceBusConnectionString" Value="Endpoint=sb://iotland.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ewniN1cBNBi9I2WCYKGr6k/bSg1q5C25l04gCqixXJo=" />
+      <Parameter Name="DeviceActorService_EventHubName" Value="DeviceDemoOutputHub" />
       <Parameter Name="DeviceActorService_QueueLength" Value="100" />
    </Parameters>
 </Application>

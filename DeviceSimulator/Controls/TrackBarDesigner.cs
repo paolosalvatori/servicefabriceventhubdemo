@@ -41,7 +41,7 @@ namespace Microsoft.AzureCat.Samples.DeviceSimulator
 			
 			get 
 			{ 
-				CustomTrackBar control = this.Control as CustomTrackBar;
+				CustomTrackBar control = Control as CustomTrackBar;
 
 				// Disallow vertical or horizontal sizing when AutoSize = True
 				if(control != null && control.AutoSize == true)
