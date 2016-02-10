@@ -177,7 +177,7 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
                 {
                     return actorProxyDictionary[deviceId];
                 }
-                actorProxyDictionary[deviceId] = ActorProxy.Create<IDeviceActor>(new ActorId(deviceId),
+                actorProxyDictionary[deviceId] = ActorProxy.Create<IDeviceActor>(new ActorId($"device{deviceId}"),
                                                                                  new Uri(OwinCommunicationListener.DeviceActorServiceUri));
                 return actorProxyDictionary[deviceId];
             }
