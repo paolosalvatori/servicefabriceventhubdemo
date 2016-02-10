@@ -145,7 +145,7 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
                 {
                     return actorProxyDictionary[deviceId];
                 }
-                actorProxyDictionary[deviceId] = ActorProxy.Create<IDeviceActor>(new ActorId($"device{deviceId}"), serviceUri);
+                actorProxyDictionary[deviceId] = ActorProxy.Create<IDeviceActor>(new ActorId(deviceId), serviceUri);
                 return actorProxyDictionary[deviceId];
             }
         }
