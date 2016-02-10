@@ -288,6 +288,9 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
 
         public Task SetData(Device data)
         {
+            var nodeName = FabricRuntime.GetNodeContext().NodeName;
+            System.Diagnostics.Trace.WriteLine($"deviceId: {data.DeviceId} nodeName: {nodeName}");
+
             State.Data = data;
 
             // Trace ETW event
