@@ -100,10 +100,15 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                 // Create default data
                 if (State.Data == null)
                 {
+                    // The device id is a string with the following format: device<number>
+                    var deviceIdAsString = Id.ToString();
+                    long deviceId;
+                    long.TryParse(deviceIdAsString.Substring(6), out deviceId);
+
                     State.Data = new Device
                     {
-                        DeviceId = Id.GetLongId(),
-                        Name = $"Device {Id.GetLongId()}",
+                        DeviceId = deviceId,
+                        Name = deviceIdAsString,
                         MinThreshold = MinThresholdDefault,
                         MaxThreshold = MaxThresholdDefault,
                         Model = Unknown,
