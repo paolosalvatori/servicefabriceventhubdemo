@@ -16,11 +16,15 @@
 #endregion
 
 #region Using Directives
+
 using System;
+using System.Diagnostics.Tracing;
 using System.Fabric;
 using System.Threading;
-using Microsoft.ServiceFabric.Actors;
 using Microsoft.ApplicationInsights;
+using Microsoft.ServiceFabric.Actors;
+using Microsoft.ServiceFabric.Telemetry.ApplicationInsights;
+
 #endregion
 
 namespace Microsoft.AzureCat.Samples.DeviceActorService
@@ -53,6 +57,7 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                     TelemetryClient.Context.Session.Id = Guid.NewGuid().ToString();
                     TelemetryClient.Context.Device.OperatingSystem = Environment.OSVersion.ToString();
 
+                    Listener.Enable(EventLevel.Verbose);
                     Thread.Sleep(Timeout.Infinite);
                         // Prevents this host process from terminating to keep the service host process running.
                 }
