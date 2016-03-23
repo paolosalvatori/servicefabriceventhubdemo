@@ -25,6 +25,7 @@ using System.Web.Http;
 using Microsoft.AzureCat.Samples.DeviceActorService.Interfaces;
 using Microsoft.AzureCat.Samples.PayloadEntities;
 using Microsoft.ServiceFabric.Actors;
+using Microsoft.ServiceFabric.Actors.Client;
 
 #endregion
 

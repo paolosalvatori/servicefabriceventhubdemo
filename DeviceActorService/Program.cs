@@ -18,12 +18,9 @@
 #region Using Directives
 
 using System;
-using System.Diagnostics.Tracing;
-using System.Fabric;
 using System.Threading;
 using Microsoft.ApplicationInsights;
-using Microsoft.ServiceFabric.Actors;
-using Microsoft.ServiceFabric.Telemetry.ApplicationInsights;
+using Microsoft.ServiceFabric.Actors.Runtime;
 
 #endregion
 
@@ -34,7 +31,7 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
         /// <summary>
         /// Application Insights Telemetry Client static field
         /// </summary>
-        internal static TelemetryClient TelemetryClient = new TelemetryClient();
+        internal static TelemetryClient TelemetryClient;
 
         /// <summary>
         /// This is the entry point of the service host process.
@@ -43,24 +40,29 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
         {
             try
             {
-                // Creating a FabricRuntime connects this host process to the Service Fabric runtime on this node.
-                using (var fabricRuntime = FabricRuntime.Create())
-                {
-                    // This line registers your actor class with the Fabric Runtime.
-                    // The contents of your ServiceManifest.xml and ApplicationManifest.xml files
-                    // are automatically populated when you build this project.
-                    // For more information, see http://aka.ms/servicefabricactorsplatform
-                    fabricRuntime.RegisterActor<DeviceActor>();
+                TelemetryClient = new TelemetryClient();
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+            try
+            {
+                // Create default garbage collection settings for all the actor types
+                var actorGarbageCollectionSettings = new ActorGarbageCollectionSettings(300, 60);
 
-                    // Initialize telemetry client
-                    TelemetryClient.Context.User.Id = Environment.UserName;
-                    TelemetryClient.Context.Session.Id = Guid.NewGuid().ToString();
-                    TelemetryClient.Context.Device.OperatingSystem = Environment.OSVersion.ToString();
+                // This line registers your actor class with the Fabric Runtime.
+                // The contents of your ServiceManifest.xml and ApplicationManifest.xml files
+                // are automatically populated when you build this project.
+                // For more information, see http://aka.ms/servicefabricactorsplatform
 
-                    Listener.Enable(EventLevel.Verbose);
-                    Thread.Sleep(Timeout.Infinite);
-                        // Prevents this host process from terminating to keep the service host process running.
-                }
+                ActorRuntime.RegisterActorAsync<DeviceActor>(
+                   (context, actorType) => new DeviceActorService(context, actorType, () => new DeviceActor(), null, new ActorServiceSettings
+                   {
+                       ActorGarbageCollectionSettings = actorGarbageCollectionSettings
+                   })).GetAwaiter().GetResult();
+
+                Thread.Sleep(Timeout.Infinite);
             }
             catch (Exception e)
             {

@@ -19,7 +19,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Fabric;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,25 +26,23 @@ using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AzureCat.Samples.DeviceActorService.Interfaces;
 using Microsoft.AzureCat.Samples.PayloadEntities;
 using Microsoft.ServiceBus.Messaging;
-using Microsoft.ServiceFabric.Actors;
+using Microsoft.ServiceFabric.Actors.Runtime;
 using Newtonsoft.Json;
 
 #endregion
 
 namespace Microsoft.AzureCat.Samples.DeviceActorService
 {
-    [ActorGarbageCollection(IdleTimeoutInSeconds = 300, ScanIntervalInSeconds = 60)]
-    public class DeviceActor : StatefulActor<DeviceActorState>, IDeviceActor
+    [ActorService(Name = "DeviceActorService")]
+    [StatePersistence(StatePersistence.Persisted)]
+    public class DeviceActor : Actor, IDeviceActor
     {
         #region Private Constants
         //************************************
-        // Parameters
+        // States
         //************************************
-        private const string ConfigurationPackage = "Config";
-        private const string ConfigurationSection = "DeviceActorServiceConfig";
-        private const string ServiceBusConnectionStringParameter = "ServiceBusConnectionString";
-        private const string EventHubNameParameter = "EventHubName";
-        private const string QueueLengthParameter = "QueueLength";
+        private const string QueueState = "queue";
+        private const string MetadataState = "metadata";
 
         //***************************
         // Constants
@@ -60,52 +57,32 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
         private const int MinThresholdDefault = 30;
         private const int MaxThresholdDefault = 50;
 
-
-        //************************************
-        // Formats
-        //************************************
-        private const string ParameterCannotBeNullFormat = "The parameter [{0}] is not defined in the Setting.xml configuration file.";
-
         //************************************
         // Constants
         //************************************
-        private const int DefaultQueueLength = 100;
         private const string Unknown = "Unknown";
         #endregion
 
         #region Private Fields
         private EventHubClient eventHubClient;
-        private string serviceBusConnectionString;
-        private string eventHubName;
-        private int queueLength;
         #endregion
 
         #region Actor Methods
-        protected override Task OnActivateAsync()
+        protected async override Task OnActivateAsync()
         {
             try
             {
-                // Initialize State
-                if (State == null)
-                {
-                    State = new DeviceActorState();
-                }
-
-                // Initialize Queue
-                if (State.Queue == null)
-                {
-                    State.Queue = new Queue<Payload>();
-                }
-
-                // Create default data
-                if (State.Data == null)
+                // Initialize States
+                await StateManager.TryAddStateAsync(QueueState, new Queue<Payload>());
+                var result = await StateManager.TryGetStateAsync<Device>(MetadataState);
+                if (!result.HasValue)
                 {
                     // The device id is a string with the following format: device<number>
                     var deviceIdAsString = Id.ToString();
                     long deviceId;
                     long.TryParse(deviceIdAsString.Substring(6), out deviceId);
 
-                    State.Data = new Device
+                    var metadata = new Device
                     {
                         DeviceId = deviceId,
                         Name = deviceIdAsString,
@@ -117,10 +94,8 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                         City = Unknown,
                         Country = Unknown
                     };
+                    await StateManager.TryAddStateAsync(MetadataState, metadata);
                 }
-
-                // Read settings from Settings.xml
-                ReadSettings();
 
                 // Create EventHubClient
                 CreateEventHubClient();
@@ -135,12 +110,11 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                 {
                     { "ActorType", "DeviceActor"},
                     { "ActorId", Id.ToString()},
-                    { "ServiceName", ActorService.ServiceInitializationParameters.ServiceName.ToString()},
-                    { "Partition", ActorService.ServicePartition.PartitionInfo.Id.ToString()},
-                    { "Node", FabricRuntime.GetNodeContext().NodeName}
+                    { "ServiceName", ActorService.Context.ServiceName.ToString()},
+                    { "Partition", ActorService.Context.PartitionId.ToString()},
+                    { "Node", ActorService.Context.NodeContext.NodeName}
                 });
             }
-            return Task.FromResult(0);
         }
 
         protected override Task OnDeactivateAsync()
@@ -154,22 +128,49 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
         {
             try
             {
-                // Enqueue the new payload
-                var queue = State.Queue;
-                queue.Enqueue(payload);
-
-                // The actor keeps the latest n payloads in a queue, where n is  
-                // defined by the QueueLength parameter in the Settings.xml file.
-                if (queue.Count > queueLength)
+                // Validate payload
+                if (payload == null)
                 {
-                    queue.Dequeue();
+                    return;
                 }
+
+                // Enqueue the new payload
+                var queueResult = await StateManager.TryGetStateAsync<Queue<Payload>>(QueueState);
+                if (queueResult.HasValue)
+                {
+                    var queue = queueResult.Value;
+                    queue.Enqueue(payload);
+
+                    // The actor keeps the latest n payloads in a queue, where n is  
+                    // defined by the QueueLength parameter in the Settings.xml file.
+                    if (queue.Count > ((DeviceActorService)ActorService).QueueLength)
+                    {
+                        queue.Dequeue();
+                    }
+                }
+
+                // Retrieve Metadata from the Actor state
+                var metadataResult = await StateManager.TryGetStateAsync<Device>(MetadataState);
+                var metadata = metadataResult.HasValue ? 
+                               metadataResult.Value :
+                               new Device
+                               {
+                                   DeviceId = payload.DeviceId,
+                                   Name = payload.Name,
+                                   MinThreshold = MinThresholdDefault,
+                                   MaxThreshold = MaxThresholdDefault,
+                                   Model = Unknown,
+                                   Type = Unknown,
+                                   Manufacturer = Unknown,
+                                   City = Unknown,
+                                   Country = Unknown
+                               };
 
                 // Trace ETW event
                 ActorEventSource.Current.Message($"Id=[{payload.DeviceId}] Value=[{payload.Value}] Timestamp=[{payload.Timestamp}]");
 
                 // This ETW event is traced to a separate table with respect to the message
-                ActorEventSource.Current.Telemetry(State.Data, payload);
+                ActorEventSource.Current.Telemetry(metadata, payload);
 
                 // Track Application Insights event
                 Program.TelemetryClient.TrackEvent(new EventTelemetry
@@ -177,23 +178,23 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                     Name = "Telemetry",
                     Properties =
                             {
-                                {"DeviceId", State.Data.DeviceId.ToString(CultureInfo.InvariantCulture)},
-                                {"Name", State.Data.Name},
-                                {"City", State.Data.City},
-                                {"Country", State.Data.Country},
-                                {"Manufacturer", State.Data.Manufacturer},
-                                {"Model", State.Data.Model},
-                                {"Type", State.Data.Type},
-                                {"MinThreshold", State.Data.MinThreshold.ToString(CultureInfo.InvariantCulture)},
-                                {"MaxThreshold", State.Data.MaxThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"DeviceId", metadata.DeviceId.ToString(CultureInfo.InvariantCulture)},
+                                {"Name", metadata.Name},
+                                {"City", metadata.City},
+                                {"Country", metadata.Country},
+                                {"Manufacturer", metadata.Manufacturer},
+                                {"Model", metadata.Model},
+                                {"Type", metadata.Type},
+                                {"MinThreshold", metadata.MinThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"MaxThreshold", metadata.MaxThreshold.ToString(CultureInfo.InvariantCulture)},
                                 {"Value", payload.Value.ToString(CultureInfo.InvariantCulture)},
                                 {"Status", payload.Status},
                                 {"Timestamp", payload.Timestamp.ToString(CultureInfo.InvariantCulture)},
                                 {"ActorType", "DeviceActor"},
                                 {"ActorId", Id.ToString()},
-                                {"ServiceName", ActorService.ServiceInitializationParameters.ServiceName.ToString()},
-                                {"Partition", ActorService.ServicePartition.PartitionInfo.Id.ToString()},
-                                {"Node", FabricRuntime.GetNodeContext().NodeName}
+                                {"ServiceName", ActorService.Context.ServiceName.ToString()},
+                                {"Partition", ActorService.Context.PartitionId.ToString()},
+                                {"Node", ActorService.Context.NodeContext.NodeName}
                             },
                     Metrics =
                             {
@@ -203,20 +204,20 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                 });
 
                 // Real spikes happen when both Spike1 and Spike2 are equal to 1. By the way, you can change the logic
-                if (payload.Value < State.Data.MinThreshold || payload.Value > State.Data.MaxThreshold)
+                if (payload.Value < metadata.MinThreshold || payload.Value > metadata.MaxThreshold)
                 {
                     // Create EventData object with the payload serialized in JSON format 
                     var alert = new Alert
                     {
-                        DeviceId = State.Data.DeviceId,
-                        Name = State.Data.Name,
-                        MinThreshold = State.Data.MinThreshold,
-                        MaxThreshold = State.Data.MaxThreshold,
-                        Model = State.Data.Model,
-                        Type = State.Data.Type,
-                        Manufacturer = State.Data.Manufacturer,
-                        City = State.Data.City,
-                        Country = State.Data.Country,
+                        DeviceId = metadata.DeviceId,
+                        Name = metadata.Name,
+                        MinThreshold = metadata.MinThreshold,
+                        MaxThreshold = metadata.MaxThreshold,
+                        Model = metadata.Model,
+                        Type = metadata.Type,
+                        Manufacturer = metadata.Manufacturer,
+                        City = metadata.City,
+                        Country = metadata.Country,
                         Status = payload.Status,
                         Value = payload.Value,
                         Timestamp = payload.Timestamp
@@ -239,7 +240,7 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                         ActorEventSource.Current.Message($"[Alert] Id=[{payload.DeviceId}] Value=[{payload.Value}] Timestamp=[{payload.Timestamp}]");
 
                         // This ETW event is traced to a separate table
-                        ActorEventSource.Current.Alert(State.Data, payload);
+                        ActorEventSource.Current.Alert(metadata, payload);
 
                         // Track Application Insights event
                         Program.TelemetryClient.TrackEvent(new EventTelemetry
@@ -247,23 +248,23 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                             Name = "Alert",
                             Properties =
                             {
-                                {"DeviceId", State.Data.DeviceId.ToString(CultureInfo.InvariantCulture)},
-                                {"Name", State.Data.Name},
-                                {"City", State.Data.City},
-                                {"Country", State.Data.Country},
-                                {"Manufacturer", State.Data.Manufacturer},
-                                {"Model", State.Data.Model},
-                                {"Type", State.Data.Type},
-                                {"MinThreshold", State.Data.MinThreshold.ToString(CultureInfo.InvariantCulture)},
-                                {"MaxThreshold", State.Data.MaxThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"DeviceId", metadata.DeviceId.ToString(CultureInfo.InvariantCulture)},
+                                {"Name", metadata.Name},
+                                {"City", metadata.City},
+                                {"Country", metadata.Country},
+                                {"Manufacturer", metadata.Manufacturer},
+                                {"Model", metadata.Model},
+                                {"Type", metadata.Type},
+                                {"MinThreshold", metadata.MinThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"MaxThreshold", metadata.MaxThreshold.ToString(CultureInfo.InvariantCulture)},
                                 {"Value", payload.Value.ToString(CultureInfo.InvariantCulture)},
                                 {"Status", payload.Status},
                                 {"Timestamp", payload.Timestamp.ToString(CultureInfo.InvariantCulture)},
                                 {"ActorType", "DeviceActor"},
                                 {"ActorId", Id.ToString()},
-                                {"ServiceName", ActorService.ServiceInitializationParameters.ServiceName.ToString()},
-                                {"Partition", ActorService.ServicePartition.PartitionInfo.Id.ToString()},
-                                {"Node", FabricRuntime.GetNodeContext().NodeName}
+                                {"ServiceName", ActorService.Context.ServiceName.ToString()},
+                                {"Partition", ActorService.Context.PartitionId.ToString()},
+                                {"Node", ActorService.Context.NodeContext.NodeName}
                             },
                             Metrics =
                             {
@@ -284,16 +285,23 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                 {
                     { "ActorType", "DeviceActor"},
                     { "ActorId", Id.ToString()},
-                    { "ServiceName", ActorService.ServiceInitializationParameters.ServiceName.ToString()},
-                    { "Partition", ActorService.ServicePartition.PartitionInfo.Id.ToString()},
-                    { "Node", FabricRuntime.GetNodeContext().NodeName}
+                    { "ServiceName", ActorService.Context.ServiceName.ToString()},
+                    { "Partition", ActorService.Context.PartitionId.ToString()},
+                    { "Node", ActorService.Context.NodeContext.NodeName}
                 });
             }
         }
 
-        public Task SetData(Device data)
+        public async Task SetData(Device data)
         {
-            State.Data = data;
+            // Validate parameter
+            if (data == null)
+            {
+                return;
+            }
+
+            // Save metadata to Actor state
+            await StateManager.SetStateAsync(MetadataState, data);
 
             // Trace ETW event
             ActorEventSource.Current.Metadata(data);
@@ -304,90 +312,70 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                 Name = "Metadata",
                 Properties =
                             {
-                                {"DeviceId", State.Data.DeviceId.ToString(CultureInfo.InvariantCulture)},
-                                {"Name", State.Data.Name},
-                                {"City", State.Data.City},
-                                {"Country", State.Data.Country},
-                                {"Manufacturer", State.Data.Manufacturer},
-                                {"Model", State.Data.Model},
-                                {"Type", State.Data.Type},
-                                {"MinThreshold", State.Data.MinThreshold.ToString(CultureInfo.InvariantCulture)},
-                                {"MaxThreshold", State.Data.MaxThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"DeviceId", data.DeviceId.ToString(CultureInfo.InvariantCulture)},
+                                {"Name", data.Name},
+                                {"City", data.City},
+                                {"Country", data.Country},
+                                {"Manufacturer", data.Manufacturer},
+                                {"Model", data.Model},
+                                {"Type", data.Type},
+                                {"MinThreshold", data.MinThreshold.ToString(CultureInfo.InvariantCulture)},
+                                {"MaxThreshold", data.MaxThreshold.ToString(CultureInfo.InvariantCulture)},
                                 {"ActorType", "DeviceActor"},
                                 {"ActorId", Id.ToString()},
-                                {"ServiceName", ActorService.ServiceInitializationParameters.ServiceName.ToString()},
-                                {"Partition", ActorService.ServicePartition.PartitionInfo.Id.ToString()},
-                                {"Node", FabricRuntime.GetNodeContext().NodeName}
+                                {"ServiceName", ActorService.Context.ServiceName.ToString()},
+                                {"Partition", ActorService.Context.PartitionId.ToString()},
+                                {"Node", ActorService.Context.NodeContext.NodeName}
                             }
             });
-
-            return Task.FromResult(0);
         }
 
-        public Task<Device> GetData()
+        public async Task<Device> GetData()
         {
-            return Task.FromResult(State.Data);
+            // Retrieve Metadata from the Actor state
+            Device metadata;
+            var metadataResult = await StateManager.TryGetStateAsync<Device>(MetadataState);
+            if (metadataResult.HasValue)
+            {
+                metadata = metadataResult.Value;
+            }
+            else
+            {
+                // The device id is a string with the following format: device<number>
+                var deviceIdAsString = Id.ToString();
+                long deviceId;
+                long.TryParse(deviceIdAsString.Substring(6), out deviceId);
+
+                metadata = new Device
+                {
+                    DeviceId = deviceId,
+                    Name = deviceIdAsString,
+                    MinThreshold = MinThresholdDefault,
+                    MaxThreshold = MaxThresholdDefault,
+                    Model = Unknown,
+                    Type = Unknown,
+                    Manufacturer = Unknown,
+                    City = Unknown,
+                    Country = Unknown
+                };
+            }
+            return metadata;
         }
 
         #endregion
 
         #region Private Methods
-        private void ReadSettings()
-        {
-            // Read settings from the DeviceActorServiceConfig section in the Settings.xml file
-            var activationContext = ActorService.ServiceInitializationParameters.CodePackageActivationContext;
-            var config = activationContext.GetConfigurationPackageObject(ConfigurationPackage);
-            var section = config.Settings.Sections[ConfigurationSection];
-
-            // Read the ServiceBusConnectionString setting from the Settings.xml file
-            var parameter = section.Parameters[ServiceBusConnectionStringParameter];
-            if (!string.IsNullOrWhiteSpace(parameter?.Value))
-            {
-                serviceBusConnectionString = parameter.Value;
-            }
-            else
-            {
-                throw new ArgumentException(
-                    string.Format(ParameterCannotBeNullFormat, ServiceBusConnectionStringParameter),
-                                  ServiceBusConnectionStringParameter);
-            }
-
-            // Read the EventHubName setting from the Settings.xml file
-            parameter = section.Parameters[EventHubNameParameter];
-            if (!string.IsNullOrWhiteSpace(parameter?.Value))
-            {
-                eventHubName = parameter.Value;
-            }
-            else
-            {
-                throw new ArgumentException(string.Format(ParameterCannotBeNullFormat, EventHubNameParameter),
-                                            EventHubNameParameter);
-            }
-
-            // Read the QueueLength setting from the Settings.xml file
-            parameter = section.Parameters[QueueLengthParameter];
-            if (!string.IsNullOrWhiteSpace(parameter?.Value))
-            {
-                if (!int.TryParse(parameter.Value, out queueLength))
-                {
-                    queueLength = DefaultQueueLength;
-                }
-            }
-            else
-            {
-                throw new ArgumentException(string.Format(ParameterCannotBeNullFormat, QueueLengthParameter),
-                                            QueueLengthParameter);
-            }
-        }
-
         public void CreateEventHubClient()
         {
-            if (string.IsNullOrWhiteSpace(serviceBusConnectionString) || string.IsNullOrWhiteSpace(eventHubName))
+            var deviceActorService = ActorService as DeviceActorService;
+            if (string.IsNullOrWhiteSpace(deviceActorService?.ServiceBusConnectionString) || 
+                string.IsNullOrWhiteSpace(deviceActorService.EventHubName))
             {
                 return;
             }
-            eventHubClient = EventHubClient.CreateFromConnectionString(serviceBusConnectionString, eventHubName);
-            ActorEventSource.Current.Message($"Id=[{State.Data.DeviceId}] EventHubClient created");
+            eventHubClient = EventHubClient.CreateFromConnectionString(deviceActorService.ServiceBusConnectionString,
+                                                                       deviceActorService.EventHubName);
+            ActorEventSource.Current.Message($"Id=[{Id}] EventHubClient created");
         }
         #endregion
     }

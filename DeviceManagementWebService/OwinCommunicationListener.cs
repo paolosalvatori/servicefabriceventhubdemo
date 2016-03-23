@@ -39,47 +39,22 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
         private const string ConfigurationPackage = "Config";
         private const string ConfigurationSection = "DeviceManagementWebServiceConfig";
         private const string DeviceActorServiceUriParameter = "DeviceActorServiceUri";
-
-        //***************************
-        // Constants
-        //***************************
-        private const string DeviceId = "id";
-        private const string Value = "value";
-        private const string Timestamp = "timestamp";
-
-        //************************************
-        // Default Values
-        //************************************
-        private const int MinThresholdDefault = 30;
-        private const int MaxThresholdDefault = 50;
-
-
-        //************************************
-        // Formats
-        //************************************
-        private const string ParameterCannotBeNullFormat = "The parameter [{0}] is not defined in the Setting.xml configuration file.";
-
-        //************************************
-        // Constants
-        //************************************
-        private const int DefaultQueueLength = 100;
-        private const string Unknown = "Unknown";
         #endregion
 
         #region Private Fields
         private readonly IOwinAppBuilder startup;
         private readonly string appRoot;
-        private readonly ServiceInitializationParameters serviceInitializationParameters;
+        private readonly StatelessServiceContext context;
         private IDisposable serverHandle;
         private string listeningAddress;
         #endregion
 
         #region Public Constructor
-        public OwinCommunicationListener(string appRoot, IOwinAppBuilder startup, ServiceInitializationParameters serviceInitializationParameters)
+        public OwinCommunicationListener(string appRoot, IOwinAppBuilder startup, StatelessServiceContext context)
         {
             this.startup = startup;
             this.appRoot = appRoot;
-            this.serviceInitializationParameters = serviceInitializationParameters;
+            this.context = context;
         }
         #endregion
 
@@ -93,7 +68,7 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
             try
             {
                 // Read settings from the DeviceActorServiceConfig section in the Settings.xml file
-                var activationContext = serviceInitializationParameters.CodePackageActivationContext;
+                var activationContext = context.CodePackageActivationContext;
                 var config = activationContext.GetConfigurationPackageObject(ConfigurationPackage);
                 var section = config.Settings.Sections[ConfigurationSection];
 
@@ -107,16 +82,16 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
                                             parameter.Value :
                                             // By default, the current service assumes that if no URI is explicitly defined for the actor service
                                             // in the Setting.xml file, the latter is hosted in the same Service Fabric application.
-                                            $"fabric:/{serviceInitializationParameters.ServiceName.Segments[1]}DeviceActorService";
+                                            $"fabric:/{context.ServiceName.Segments[1]}DeviceActorService";
                 }
                 else
                 {
                     // By default, the current service assumes that if no URI is explicitly defined for the actor service
                     // in the Setting.xml file, the latter is hosted in the same Service Fabric application.
-                    DeviceActorServiceUri = $"fabric:/{serviceInitializationParameters.ServiceName.Segments[1]}DeviceActorService";
+                    DeviceActorServiceUri = $"fabric:/{context.ServiceName.Segments[1]}DeviceActorService";
                 }
 
-                var serviceEndpoint = serviceInitializationParameters.CodePackageActivationContext.GetEndpoint("ServiceEndpoint");
+                var serviceEndpoint = context.CodePackageActivationContext.GetEndpoint("ServiceEndpoint");
                 var port = serviceEndpoint.Port;
 
                 listeningAddress = String.Format(
@@ -130,7 +105,7 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
                 serverHandle = WebApp.Start(listeningAddress, appBuilder => startup.Configuration(appBuilder));
                 string publishAddress = listeningAddress.Replace("+", FabricRuntime.GetNodeContext().IPAddressOrFQDN);
 
-                ServiceEventSource.Current.Message("Listening on {0}", publishAddress);
+                ServiceEventSource.Current.Message($"Listening on {publishAddress}");
 
                 return Task.FromResult(publishAddress);
             }

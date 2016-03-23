@@ -225,7 +225,7 @@ namespace Microsoft.AzureCat.Samples.AlertClient
             this.mainHeaderPanel.HeaderColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(180)))), ((int)(((byte)(209)))));
             this.mainHeaderPanel.HeaderFont = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Bold);
             this.mainHeaderPanel.HeaderHeight = 24;
-            this.mainHeaderPanel.HeaderText = "SignalR Hub Configuration";
+            this.mainHeaderPanel.HeaderText = "Event Hub Configuration";
             this.mainHeaderPanel.Icon = global::Microsoft.AzureCat.Samples.AlertClient.Properties.Resources.SmallWorld;
             this.mainHeaderPanel.IconTransparentColor = System.Drawing.Color.White;
             this.mainHeaderPanel.Location = new System.Drawing.Point(0, 0);

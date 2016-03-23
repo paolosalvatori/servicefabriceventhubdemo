@@ -7,10 +7,6 @@
    <Section Name="DeviceActorServiceReplicatorSecurityConfig">
       <Parameter Name="CredentialType" Value="None" />
    </Section>
-   <Section Name="DeviceActorServiceLocalStoreConfig">
-      <Parameter Name="MaxAsyncCommitDelayInMilliseconds" Value="100" />
-      <Parameter Name="MaxVerPages" Value="32768" />
-   </Section>
    <Section Name="DeviceActorServiceConfig">
       <Parameter Name="ServiceBusConnectionString" Value="" />
       <Parameter Name="EventHubName" Value="" />

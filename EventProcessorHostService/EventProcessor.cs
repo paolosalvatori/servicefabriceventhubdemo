@@ -26,6 +26,7 @@ using Microsoft.AzureCat.Samples.DeviceActorService.Interfaces;
 using Microsoft.AzureCat.Samples.PayloadEntities;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.ServiceFabric.Actors;
+using Microsoft.ServiceFabric.Actors.Client;
 using Newtonsoft.Json;
 
 #endregion
@@ -60,7 +61,8 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
         #region IEventProcessor Methods
         public Task OpenAsync(PartitionContext context)
         {
-           return Task.FromResult<object>(null);
+            ServiceEventSource.Current.Message($"Lease acquired: EventHub=[{context.EventHubPath}] ConsumerGroup=[{context.ConsumerGroupName}] PartitionId=[{context.Lease.PartitionId}]");
+            return Task.FromResult<object>(null);
         }
 
         public async Task ProcessEventsAsync(PartitionContext context, IEnumerable<EventData> events)
@@ -117,7 +119,7 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
         {
             try
             {
-
+                ServiceEventSource.Current.Message($"Lease lost: EventHub=[{context.EventHubPath}] ConsumerGroup=[{context.ConsumerGroupName}] PartitionId=[{context.Lease.PartitionId}]");
                 if (reason == CloseReason.Shutdown)
                 {
                     await context.CheckpointAsync();

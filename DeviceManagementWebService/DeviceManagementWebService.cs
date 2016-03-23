@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
@@ -12,6 +13,13 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
     /// </summary>
     internal sealed class DeviceManagementWebService : StatelessService
     {
+        #region Public Constructor
+        public DeviceManagementWebService(StatelessServiceContext context)
+            : base(context)
+        { }
+        #endregion
+
+        #region StatelessService Protected Methods
         /// <summary>
         /// Optional override to create listeners (like tcp, http) for this service instance.
         /// </summary>
@@ -37,5 +45,6 @@ namespace Microsoft.AzureCat.Samples.DeviceManagementWebService
                 await Task.Delay(TimeSpan.FromSeconds(1), cancelServiceInstance);
             }
         }
+        #endregion
     }
 }

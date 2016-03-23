@@ -19,11 +19,11 @@
 
 using System;
 using System.Diagnostics.Tracing;
-using System.Fabric;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Microsoft.AzureCat.Samples.PayloadEntities;
-using Microsoft.ServiceFabric.Actors;
+using Microsoft.ServiceFabric.Actors.Runtime;
 
 #endregion
 
@@ -32,8 +32,24 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
     [EventSource(Name = "IoTDemo-DeviceActorService")]
     public sealed class ActorEventSource : EventSource
     {
-        public static ActorEventSource Current = new ActorEventSource();
+        #region Public Static Properties
+        public static ActorEventSource Current = new ActorEventSource(); 
+        #endregion
 
+        #region Public Constructors
+        static ActorEventSource()
+        {
+            // A workaround for the problem where ETW activities do not get tracked until Tasks infrastructure is initialized.
+            // This problem will be fixed in .NET Framework 4.6.2.
+            Task.Run(() => { }).Wait();
+        }
+
+        // Instance constructor is private to enforce singleton semantics
+        private ActorEventSource()
+        { }
+        #endregion
+
+        #region Public Methods
         [Event(1, Level = EventLevel.Informational, Message = "{0}")]
         public void Message(string message, [CallerFilePath] string source = "", [CallerMemberName] string method = "")
         {
@@ -45,32 +61,7 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
         }
 
         [NonEvent]
-        public void ActorMessage(
-            StatelessActor actor, string message, [CallerFilePath] string source = "", [CallerMemberName] string method = "", params object[] args)
-        {
-            if (!IsEnabled())
-            {
-                return;
-            }
-            string finalMessage = string.Format(message, args);
-            ActorMessage(
-                actor.GetType().ToString(),
-                actor.Id.ToString(),
-                actor.ActorService.ServiceInitializationParameters.CodePackageActivationContext.ApplicationTypeName,
-                actor.ActorService.ServiceInitializationParameters.CodePackageActivationContext.ApplicationName,
-                actor.ActorService.ServiceInitializationParameters.ServiceTypeName,
-                actor.ActorService.ServiceInitializationParameters.ServiceName.ToString(),
-                actor.ActorService.ServiceInitializationParameters.PartitionId,
-                actor.ActorService.ServiceInitializationParameters.InstanceId,
-                FabricRuntime.GetNodeContext().NodeName,
-                GetClassFromFilePath(source) ?? "UNKNOWN",
-                method ?? "UNKNOWN",
-                finalMessage);
-        }
-
-        [NonEvent]
-        public void ActorMessage(
-            StatefulActorBase actor, string message, [CallerFilePath] string source = "", [CallerMemberName] string method = "", params object[] args)
+        public void ActorMessage(Actor actor, string message, [CallerFilePath] string source = "", [CallerMemberName] string method = "", params object[] args)
         {
             if (!IsEnabled())
             {
@@ -80,13 +71,13 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
             ActorMessage(
                 actor.GetType().ToString(),
                 actor.Id.ToString(),
-                actor.ActorService.ServiceInitializationParameters.CodePackageActivationContext.ApplicationTypeName,
-                actor.ActorService.ServiceInitializationParameters.CodePackageActivationContext.ApplicationName,
-                actor.ActorService.ServiceInitializationParameters.ServiceTypeName,
-                actor.ActorService.ServiceInitializationParameters.ServiceName.ToString(),
-                actor.ActorService.ServiceInitializationParameters.PartitionId,
-                actor.ActorService.ServiceInitializationParameters.ReplicaId,
-                FabricRuntime.GetNodeContext().NodeName,
+                actor.ActorService.Context.CodePackageActivationContext.ApplicationTypeName,
+                actor.ActorService.Context.CodePackageActivationContext.ApplicationName,
+                actor.ActorService.Context.ServiceTypeName,
+                actor.ActorService.Context.ServiceName.ToString(),
+                actor.ActorService.Context.PartitionId,
+                actor.ActorService.Context.ReplicaId,
+                actor.ActorService.Context.NodeContext.NodeName,
                 GetClassFromFilePath(source) ?? "UNKNOWN",
                 method ?? "UNKNOWN",
                 finalMessage);
@@ -166,7 +157,9 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                          device.MaxThreshold);
             }
         }
+        #endregion
 
+        #region Private Instance Methods
         [Event(2, Level = EventLevel.Informational, Message = "{11}")]
         private void ActorMessage(
             string actorType,
@@ -290,7 +283,9 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
                        minThreshold,
                        maxThreshold);
         }
+        #endregion
 
+        #region Private Static Methods
         private static string GetClassFromFilePath(string sourceFilePath)
         {
             if (string.IsNullOrWhiteSpace(sourceFilePath))
@@ -299,6 +294,7 @@ namespace Microsoft.AzureCat.Samples.DeviceActorService
             }
             var file = new FileInfo(sourceFilePath);
             return Path.GetFileNameWithoutExtension(file.Name);
-        }
+        } 
+        #endregion
     }
 }

@@ -58,13 +58,13 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
         private string consumerGroupName;
         private string deviceActorServiceUri;
         private EventProcessorHost eventProcessorHost;
-        private readonly ServiceInitializationParameters serviceInitializationParameters;
+        private readonly StatelessServiceContext context;
         #endregion
 
         #region Public Constructor
-        public EventProcessorHostListener(ServiceInitializationParameters serviceInitializationParameters)
+        public EventProcessorHostListener(StatelessServiceContext context)
         {
-            this.serviceInitializationParameters = serviceInitializationParameters;
+            this.context = context;
         }
         #endregion
 
@@ -74,8 +74,8 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
             try
             {
                 // Get the EventProcessorHostConfig section from the Settings.xml file
-                var context = serviceInitializationParameters.CodePackageActivationContext;
-                var config = context.GetConfigurationPackageObject(ConfigurationPackage);
+                var codePackageActivationContext = context.CodePackageActivationContext;
+                var config = codePackageActivationContext.GetConfigurationPackageObject(ConfigurationPackage);
                 var section = config.Settings.Sections[ConfigurationSection];
 
                 // Check if a parameter called ServiceBusConnectionString exists in the EventProcessorHostConfig config section
@@ -189,13 +189,13 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
                                             parameter.Value :
                                             // By default, the current service assumes that if no URI is explicitly defined for the actor service
                                             // in the Setting.xml file, the latter is hosted in the same Service Fabric application.
-                                            $"fabric:/{serviceInitializationParameters.ServiceName.Segments[1]}DeviceActorService";
+                                            $"fabric:/{context.ServiceName.Segments[1]}DeviceActorService";
                 }
                 else
                 {
                     // By default, the current service assumes that if no URI is explicitly defined for the actor service
                     // in the Setting.xml file, the latter is hosted in the same Service Fabric application.
-                    deviceActorServiceUri = $"fabric:/{serviceInitializationParameters.ServiceName.Segments[1]}DeviceActorService";
+                    deviceActorServiceUri = $"fabric:/{context.ServiceName.Segments[1]}DeviceActorService";
                 }
 
                 // Start EventProcessorHost
@@ -290,7 +290,7 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
             }
 
             // Trace Exception
-            ServiceEventSource.Current.Message(e.Exception.Message,e.Exception.InnerException?.Message ?? string.Empty);
+            ServiceEventSource.Current.Message($"Exception=[{e.Exception.Message}] InnerException=[{e.Exception.InnerException?.Message ?? string.Empty}]");
         }
         #endregion
     }

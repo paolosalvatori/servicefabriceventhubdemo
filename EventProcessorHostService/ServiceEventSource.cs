@@ -20,6 +20,8 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.Fabric;
+using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Services.Runtime;
 
@@ -40,7 +42,8 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
         }
 
         // Instance constructor is private to enforce singleton semantics
-        private ServiceEventSource() : base() { }
+        private ServiceEventSource()
+        { }
 
         #region Keywords
         // Event keywords can be used to categorize events. 
@@ -62,24 +65,14 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
         // Put [NonEvent] attribute on all methods that do not define an event.
         // For more information see https://msdn.microsoft.com/en-us/library/system.diagnostics.tracing.eventsource.aspx
 
-        [NonEvent]
-        public void Message(string message, params object[] args)
+        [Event(1, Level = EventLevel.Informational, Message = "{0}")]
+        public void Message(string message, [CallerFilePath] string source = "", [CallerMemberName] string method = "")
         {
-            if (IsEnabled())
+            if (!IsEnabled())
             {
-                string finalMessage = string.Format(message, args);
-                Message(finalMessage);
+                return;
             }
-        }
-
-        private const int MessageEventId = 1;
-        [Event(MessageEventId, Level = EventLevel.Informational, Message = "{0}")]
-        public void Message(string message)
-        {
-            if (IsEnabled())
-            {
-                WriteEvent(MessageEventId, message);
-            }
+            WriteEvent(1, $"[{GetClassFromFilePath(source) ?? "UNKNOWN"}::{method ?? "UNKNOWN"}] {message}");
         }
 
         [NonEvent]
@@ -89,12 +82,12 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
             {
                 string finalMessage = string.Format(message, args);
                 ServiceMessage(
-                    service.ServiceInitializationParameters.ServiceName.ToString(),
-                    service.ServiceInitializationParameters.ServiceTypeName,
-                    service.ServiceInitializationParameters.InstanceId,
-                    service.ServiceInitializationParameters.PartitionId,
-                    service.ServiceInitializationParameters.CodePackageActivationContext.ApplicationName,
-                    service.ServiceInitializationParameters.CodePackageActivationContext.ApplicationTypeName,
+                    service.Context.ServiceName.ToString(),
+                    service.Context.ServiceTypeName,
+                    service.Context.InstanceId,
+                    service.Context.PartitionId,
+                    service.Context.CodePackageActivationContext.ApplicationName,
+                    service.Context.CodePackageActivationContext.ApplicationTypeName,
                     FabricRuntime.GetNodeContext().NodeName,
                     finalMessage);
             }
@@ -107,12 +100,12 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
             {
                 string finalMessage = string.Format(message, args);
                 ServiceMessage(
-                    service.ServiceInitializationParameters.ServiceName.ToString(),
-                    service.ServiceInitializationParameters.ServiceTypeName,
-                    service.ServiceInitializationParameters.ReplicaId,
-                    service.ServiceInitializationParameters.PartitionId,
-                    service.ServiceInitializationParameters.CodePackageActivationContext.ApplicationName,
-                    service.ServiceInitializationParameters.CodePackageActivationContext.ApplicationTypeName,
+                    service.Context.ServiceName.ToString(),
+                    service.Context.ServiceTypeName,
+                    service.Context.ReplicaId,
+                    service.Context.PartitionId,
+                    service.Context.CodePackageActivationContext.ApplicationName,
+                    service.Context.CodePackageActivationContext.ApplicationTypeName,
                     FabricRuntime.GetNodeContext().NodeName,
                     finalMessage);
             }
@@ -197,7 +190,17 @@ namespace Microsoft.AzureCat.Samples.EventProcessorHostService
         }
         #endregion
 
-        #region Private methods
+        #region Private Static Methods
+        private static string GetClassFromFilePath(string sourceFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(sourceFilePath))
+            {
+                return null;
+            }
+            var file = new FileInfo(sourceFilePath);
+            return Path.GetFileNameWithoutExtension(file.Name);
+        }
+
 #if UNSAFE
         private int SizeInBytes(string s)
         {
