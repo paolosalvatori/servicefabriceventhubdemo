@@ -59,7 +59,7 @@
       </ConfigOverrides>
    </ServiceManifestImport>
    <DefaultServices>
-      <Service Name="DeviceActorService" GeneratedIdRef="de1d8306-f193-45ac-aa15-3efde9ffcb78">
+      <Service Name="DeviceActorService" GeneratedIdRef="ea05ec99-5ad6-41ad-8019-99fd7b87a2e3|Persisted">
          <StatefulService ServiceTypeName="DeviceActorServiceType" TargetReplicaSetSize="[DeviceActorService_TargetReplicaSetSize]" MinReplicaSetSize="[DeviceActorService_MinReplicaSetSize]">
             <UniformInt64Partition PartitionCount="[DeviceActorService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
          </StatefulService>
