@@ -1,16 +1,16 @@
-# Introduction #
+---
+services: service-fabric, event-hubs
+platforms: dotnet
+author: paolosalvatori
+---
+# IoT Sample with Service Fabric and Event Hubs #
 This demo demonstrates how to build an IoT application for anomaly detection using Service Fabric, Event Hubs,OWIN and ASP.NET Web API.<br/>
-
-# License#
-<p>Microsoft Corporation (&ldquo;Microsoft&rdquo;) grants you a nonexclusive, perpetual, royalty-free right to use and modify the software code provided by us for the purposes of illustration&nbsp; ("Sample Code") and to reproduce and distribute the object  code form of the Sample Code, provided that you agree: (i) to not use our name, logo, or trademarks to market your software product in which the Sample Code is embedded; (ii) to include a valid copyright notice on your software product in which the Sample  Code is embedded; and (iii) to indemnify, hold harmless, and defend us and our suppliers from and against any claims or lawsuits, whether in an action of contract, tort or otherwise, including attorneys&rsquo; fees, that arise or result from the use or distribution  of the Sample Code or the use or other dealings in the Sample Code. Unless applicable law gives you more rights, Microsoft reserves all other rights not expressly granted herein, whether by implication, estoppel or otherwise.&nbsp;</p>
-<p>THE SAMPLE CODE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL MICROSOFT OR ITS LICENSORS BE LIABLE  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
-
 
 # Architecture Design #
 The following picture shows the architecture design of the application.
 <br/>
 <br/>
-![alt tag](https://github.com/paolosalvatori/ServiceFabricEventHubDemo/blob/master/Images/VerticalArchitectureDesign.png?raw=true)
+![alt tag](https://github.com/paolosalvatori/servicefabriceventhubdemo/blob/master/Images/VerticalArchitectureDesign.png?raw=true)
 <br/>
 
 # Service Fabric Application #
@@ -33,7 +33,7 @@ The Service Fabric application ingest events from the input Event Hub, processes
 	- City
 	- Country
 
-![alt tag](https://github.com/paolosalvatori/ServiceFabricEventHubDemo/blob/master/Images/DeviceSimulator.png?raw=true)
+![alt tag](https://github.com/paolosalvatori/servicefabriceventhubdemo/blob/master/Images/DeviceSimulator.png?raw=true)
 
 2. The **DeviceManagementWebService** stateless service activates the device actors and set their metadata, which is part of their persistent state.
 3. For each device, the client application creates a separate task that simulates a distinct device sending messages to the input Event Hub. Each task acquires uses a different publisher endpoint. In particular, each task uses a SAS policy defined on the input Event Hub to acquire a SAS token to send events to its publisher endpoint.
@@ -43,7 +43,7 @@ The Service Fabric application ingest events from the input Event Hub, processes
 7. An **Alert Client** application built using Windows Forms uses **EventProcessorHost** listener to read alerts from the output Event Hub.
 8. The **Alert Client** displays incoming events in a **DataGridView**.
 
-![alt tag](https://github.com/paolosalvatori/ServiceFabricEventHubDemo/blob/master/Images/AlertClient.png?raw=true)
+![alt tag](https://github.com/paolosalvatori/servicefabriceventhubdemo/blob/master/Images/AlertClient.png?raw=true)
 
 # Application Configuration #
 Make sure to replace the following placeholders in the project files below before deploying and testing the application on the local development Service Fabric cluster or before deploying the application to your Service Fabric cluster on Microsoft Azure.
