@@ -6,7 +6,7 @@ author: paolosalvatori
 # IoT Sample with Service Fabric and Event Hubs #
 This demo demonstrates how to build an IoT application for anomaly detection using Service Fabric, Event Hubs,OWIN and ASP.NET Web API.<br/>
 
-# Architecture Design #
+# Architecture Design # 
 The following picture shows the architecture design of the application.
 <br/>
 <br/>
