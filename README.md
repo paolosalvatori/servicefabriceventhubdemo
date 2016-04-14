@@ -6,11 +6,11 @@ author: paolosalvatori
 # IoT Sample with Service Fabric and Event Hubs #
 This demo demonstrates how to build an IoT application for anomaly detection using Service Fabric, Event Hubs,OWIN and ASP.NET Web API.<br/>
 
-# Architecture Design # 
+# Architecture Design #
 The following picture shows the architecture design of the application.
 <br/>
 <br/>
-![alt tag](https://github.com/paolosalvatori/servicefabriceventhubdemo/blob/master/Images/VerticalArchitectureDesign.png?raw=true)
+![alt tag](https://raw.githubusercontent.com/paolosalvatori/servicefabriceventhubdemo/master/Images/VerticalArchitectureDesign.png)
 <br/>
 
 # Service Fabric Application #
@@ -33,7 +33,7 @@ The Service Fabric application ingest events from the input Event Hub, processes
 	- City
 	- Country
 
-![alt tag](https://github.com/paolosalvatori/servicefabriceventhubdemo/blob/master/Images/DeviceSimulator.png?raw=true)
+![alt tag](https://raw.githubusercontent.com/paolosalvatori/servicefabriceventhubdemo/master/Images/DeviceSimulator.png)
 
 2. The **DeviceManagementWebService** stateless service activates the device actors and set their metadata, which is part of their persistent state.
 3. For each device, the client application creates a separate task that simulates a distinct device sending messages to the input Event Hub. Each task acquires uses a different publisher endpoint. In particular, each task uses a SAS policy defined on the input Event Hub to acquire a SAS token to send events to its publisher endpoint.
@@ -43,7 +43,7 @@ The Service Fabric application ingest events from the input Event Hub, processes
 7. An **Alert Client** application built using Windows Forms uses **EventProcessorHost** listener to read alerts from the output Event Hub.
 8. The **Alert Client** displays incoming events in a **DataGridView**.
 
-![alt tag](https://github.com/paolosalvatori/servicefabriceventhubdemo/blob/master/Images/AlertClient.png?raw=true)
+![alt tag](https://raw.githubusercontent.com/paolosalvatori/servicefabriceventhubdemo/master/Images/AlertClient.png)
 
 # Application Configuration #
 Make sure to replace the following placeholders in the project files below before deploying and testing the application on the local development Service Fabric cluster or before deploying the application to your Service Fabric cluster on Microsoft Azure.
