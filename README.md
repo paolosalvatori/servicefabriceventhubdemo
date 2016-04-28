@@ -76,7 +76,8 @@ This list contains the placeholders that need to be replaced before deploying an
     <?xml version="1.0" encoding="utf-8"?>
     <configuration>
       <appSettings>
-	    <add key="url" value="http://localhost:8088/devicemanagement;http://[Cluster-Name].[Cluster-Location].cloudapp.azure.com:8088/devicemanagement" />
+	    <add key="url" value="http://localhost:8088/devicemanagement;
+	                          http://[Name].[Location].cloudapp.azure.com:8088/devicemanagement" />
 	    <add key="namespace" value="[Input-Event-Hub-Service-Bus-Namespace]" />
 	    <add key="keyName" value="[Input-Event-Hub-Service-Bus-Key-Name]" />
 	    <add key="keyValue" value="[Input-Event-Hub-Service-Bus-Key-Value]" />
@@ -99,10 +100,14 @@ This list contains the placeholders that need to be replaced before deploying an
     <?xml version="1.0" encoding="utf-8"?>
     <configuration>
       <appSettings>
-	    <add key="storageAccountConnectionString" value="[Output-Event-Hub-Storage-Account-Connection-String]" />
-	    <add key="serviceBusConnectionString" value="[Output-Event-Hub-Service-Bus-Connection-String]" />
-        <add key="consumerGroup" value="[Output-Event-Hub-Consumer-Group-Name]"/>
-	    <add key="eventHub" value="[Output-Event-Hub-Name];[Output-Event-Hub-Name];..." />
+          <add key="storageAccountConnectionString" 
+               value="[Output-Event-Hub-Storage-Account-Connection-String]" />
+	  <add key="serviceBusConnectionString" 
+	       value="[Output-Event-Hub-Service-Bus-Connection-String]" />
+          <add key="consumerGroup" 
+               value="[Output-Event-Hub-Consumer-Group-Name]"/>
+	  <add key="eventHub" 
+	       value="[Output-Event-Hub-Name];[Output-Event-Hub-Name];..." />
       </appSettings>
       ...
     </configuration>
@@ -113,17 +118,26 @@ This list contains the placeholders that need to be replaced before deploying an
 ```xml
     <?xml version="1.0" encoding="utf-8"?>
     <Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/IoTDemo" xmlns="http://schemas.microsoft.com/2011/01/fabric">
-       <Parameters>
-      <Parameter Name="EventProcessorHostService_InstanceCount" Value="-1" />
-      <Parameter Name="EventProcessorHostService_StorageAccountConnectionString" Value="[Input-Event-Hub-Storage-Account-Connection-String]" />
-      <Parameter Name="EventProcessorHostService_ServiceBusConnectionString" Value="[Input-Event-Hub-Service-Bus-Connection-String]" />
-      <Parameter Name="EventProcessorHostService_ConsumerGroupName" Value="[Input-Event-Hub-Consumer-Group-Name]" />
-      <Parameter Name="EventProcessorHostService_EventHubName" Value="[Input-Event-Hub-Name]" />
-      <Parameter Name="DeviceManagementWebService_InstanceCount" Value="1" />
-      <Parameter Name="DeviceActorService_PartitionCount" Value="1" />
-      <Parameter Name="DeviceActorService_ServiceBusConnectionString" Value="[Output-Event-Hub-Service-Bus-Connection-String]" />
-      <Parameter Name="DeviceActorService_EventHubName" Value="[Output-Event-Hub-Name]" />
-      <Parameter Name="DeviceActorService_QueueLength" Value="100" />
+	<Parameters>
+	    <Parameter Name="EventProcessorHostService_InstanceCount" Value="-1" />
+            <Parameter Name="EventProcessorHostService_StorageAccountConnectionString" 
+                       Value="[Input-Event-Hub-Storage-Account-Connection-String]" />
+      	    <Parameter Name="EventProcessorHostService_ServiceBusConnectionString" 
+      	               Value="[Input-Event-Hub-Service-Bus-Connection-String]" />
+      	    <Parameter Name="EventProcessorHostService_ConsumerGroupName" 
+      	    	       Value="[Input-Event-Hub-Consumer-Group-Name]" />
+      	    <Parameter Name="EventProcessorHostService_EventHubName" 
+      	               Value="[Input-Event-Hub-Name]" />
+            <Parameter Name="DeviceManagementWebService_InstanceCount" 
+                       Value="1" />
+            <Parameter Name="DeviceActorService_PartitionCount" 
+                       Value="1" />
+            <Parameter Name="DeviceActorService_ServiceBusConnectionString" 
+                       Value="[Output-Event-Hub-Service-Bus-Connection-String]" />
+            <Parameter Name="DeviceActorService_EventHubName" 
+                       Value="[Output-Event-Hub-Name]" />
+            <Parameter Name="DeviceActorService_QueueLength" 
+                       Value="100" />
        </Parameters>
     </Application>
 ```
