@@ -206,7 +206,7 @@ This list contains the placeholders that need to be replaced before deploying an
                        DefaultValue="-1" />
        	</Parameters>
 	<ServiceManifestImport>
-	    <ServiceManifestRef ServiceManifestName="DeviceActorServicePkg" ServiceManifestVersion="1.0.0" />
+            <ServiceManifestRef ServiceManifestName="DeviceActorServicePkg" ServiceManifestVersion="1.0.0" />
             <ConfigOverrides>
                 <ConfigOverride Name="Config">
                     <Settings>
@@ -241,10 +241,11 @@ This list contains the placeholders that need to be replaced before deploying an
                 </ConfigOverride>
             </ConfigOverrides>
         </ServiceManifestImport>
-                <ServiceManifestImport>
-                    <ServiceManifestRef ServiceManifestName="DeviceManagementWebServicePkg" ServiceManifestVersion="1.0.0" />
-                        <ConfigOverrides />
-                    </ServiceManifestImport>
+        <ServiceManifestImport>
+            <ServiceManifestRef ServiceManifestName="DeviceManagementWebServicePkg" 
+                                ServiceManifestVersion="1.0.0" />
+            <ConfigOverrides />
+        </ServiceManifestImport>
         <DefaultServices>
             <Service Name="DeviceActorService" GeneratedIdRef="de1d8306-f193-45ac-aa15-3efde9ffcb78">
                 <StatefulService ServiceTypeName="DeviceActorServiceType" 
@@ -262,11 +263,11 @@ This list contains the placeholders that need to be replaced before deploying an
                 </StatelessService>
             </Service>
             <Service Name="DeviceManagementWebService">
-            <StatelessService ServiceTypeName="DeviceManagementWebServiceType" 
-                              InstanceCount="[DeviceManagementWebService_InstanceCount]">
-                <SingletonPartition />
-            </StatelessService>
-        </Service>
-    </DefaultServices>
-</ApplicationManifest>
+                <StatelessService ServiceTypeName="DeviceManagementWebServiceType" 
+                                  InstanceCount="[DeviceManagementWebService_InstanceCount]">
+                    <SingletonPartition />
+                </StatelessService>
+            </Service>
+        </DefaultServices>
+    </ApplicationManifest>
 ```
