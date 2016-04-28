@@ -150,7 +150,10 @@ This list contains the placeholders that need to be replaced before deploying an
 
 ```xml
     <?xml version="1.0" encoding="utf-8"?>
-    <Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/IoTDemo" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+    <Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                 Name="fabric:/IoTDemo" 
+                 xmlns="http://schemas.microsoft.com/2011/01/fabric">
         <Parameters>
             <Parameter Name="EventProcessorHostService_InstanceCount" 
                        Value="-1" />
