@@ -72,6 +72,7 @@ This list contains the placeholders that need to be replaced before deploying an
 
 **App.config** file in the **DeviceSimulator** project:
 
+```xml
     <?xml version="1.0" encoding="utf-8"?>
     <configuration>
       <appSettings>
@@ -90,9 +91,11 @@ This list contains the placeholders that need to be replaced before deploying an
       </appSettings>
       ...
     </configuration>
+```
 
 **App.config** file in the **AlertClient** project:
 
+```xml
     <?xml version="1.0" encoding="utf-8"?>
     <configuration>
       <appSettings>
@@ -103,10 +106,12 @@ This list contains the placeholders that need to be replaced before deploying an
       </appSettings>
       ...
     </configuration>
+```
 
 **ApplicationParameters\Local.xml** file in the **IoTDemo** project:
 
-	    <?xml version="1.0" encoding="utf-8"?>
+```xml
+    <?xml version="1.0" encoding="utf-8"?>
     <Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/IoTDemo" xmlns="http://schemas.microsoft.com/2011/01/fabric">
        <Parameters>
       <Parameter Name="EventProcessorHostService_InstanceCount" Value="-1" />
@@ -121,10 +126,12 @@ This list contains the placeholders that need to be replaced before deploying an
       <Parameter Name="DeviceActorService_QueueLength" Value="100" />
        </Parameters>
     </Application>
+```
 
 **ApplicationParameters\Cloud.xml** file in the **IoTDemo** project:
 
-	    <?xml version="1.0" encoding="utf-8"?>
+```xml
+    <?xml version="1.0" encoding="utf-8"?>
     <Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/IoTDemo" xmlns="http://schemas.microsoft.com/2011/01/fabric">
        <Parameters>
       <Parameter Name="EventProcessorHostService_InstanceCount" Value="-1" />
@@ -139,9 +146,11 @@ This list contains the placeholders that need to be replaced before deploying an
       <Parameter Name="DeviceActorService_QueueLength" Value="100" />
        </Parameters>
     </Application>
+```
 
 **ApplicationManifest.xml** file in the **IoTDemo** project:
 
+```xml
     <?xml version="1.0" encoding="utf-8"?>
     <ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="IoTDemoType" ApplicationTypeVersion="1.0.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
        <Parameters>
@@ -209,3 +218,4 @@ This list contains the placeholders that need to be replaced before deploying an
       </Service>
        </DefaultServices>
     </ApplicationManifest>
+```
