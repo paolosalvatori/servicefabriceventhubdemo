@@ -206,7 +206,8 @@ This list contains the placeholders that need to be replaced before deploying an
                        DefaultValue="-1" />
        	</Parameters>
 	<ServiceManifestImport>
-            <ServiceManifestRef ServiceManifestName="DeviceActorServicePkg" ServiceManifestVersion="1.0.0" />
+            <ServiceManifestRef ServiceManifestName="DeviceActorServicePkg" 
+                                ServiceManifestVersion="1.0.0" />
             <ConfigOverrides>
                 <ConfigOverride Name="Config">
                     <Settings>
@@ -223,7 +224,8 @@ This list contains the placeholders that need to be replaced before deploying an
             </ConfigOverrides>
         </ServiceManifestImport>
         <ServiceManifestImport>
-            <ServiceManifestRef ServiceManifestName="EventProcessorHostServicePkg" ServiceManifestVersion="1.0.0" />
+            <ServiceManifestRef ServiceManifestName="EventProcessorHostServicePkg" 
+                                ServiceManifestVersion="1.0.0" />
             <ConfigOverrides>
                 <ConfigOverride Name="Config">
                     <Settings>
@@ -247,7 +249,8 @@ This list contains the placeholders that need to be replaced before deploying an
             <ConfigOverrides />
         </ServiceManifestImport>
         <DefaultServices>
-            <Service Name="DeviceActorService" GeneratedIdRef="de1d8306-f193-45ac-aa15-3efde9ffcb78">
+            <Service Name="DeviceActorService" 
+                     GeneratedIdRef="de1d8306-f193-45ac-aa15-3efde9ffcb78">
                 <StatefulService ServiceTypeName="DeviceActorServiceType" 
                                  TargetReplicaSetSize="[DeviceActorService_TargetReplicaSetSize]" 
                                  MinReplicaSetSize="[DeviceActorService_MinReplicaSetSize]">
